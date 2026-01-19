@@ -1,7 +1,7 @@
 package com.foodtech.kitchen.infrastructure.rest.exception;
 
-import com.foodtech.kitchen.application.exepcions.OrderNotFoundException;
-import com.foodtech.kitchen.application.exepcions.TaskNotFoundException;
+import com.foodtech.kitchen.application.exception.OrderNotFoundException;
+import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

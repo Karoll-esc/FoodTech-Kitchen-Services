@@ -1,6 +1,6 @@
 package com.foodtech.kitchen.application.usecases;
 
-import com.foodtech.kitchen.application.exepcions.TaskNotFoundException;
+import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.application.ports.in.StartTaskPreparationPort;
 import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
