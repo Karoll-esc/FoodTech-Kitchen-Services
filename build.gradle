@@ -30,6 +30,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
+    
+    // Auth0 & JWT
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+    implementation 'com.auth0:java-jwt:4.4.0'
 
     // ✅ NUEVO: Project Reactor para programación reactiva
     implementation 'io.projectreactor:reactor-core:3.6.0'
