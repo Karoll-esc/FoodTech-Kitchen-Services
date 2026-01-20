@@ -1,4 +1,4 @@
-package com.foodtech.kitchen.application.exepcions;
+package com.foodtech.kitchen.application.exception;
 
 public class OrderNotFoundException extends RuntimeException {
 
