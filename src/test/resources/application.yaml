@@ -1,0 +1,19 @@
+# Test Configuration
+# This configuration is used for running tests
+# Security is disabled to allow tests to run without authentication
+
+spring:
+  application:
+    name: foodtech-kitchen-service-test
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Mock issuer for tests - will not validate real tokens
+          issuer-uri: http://localhost:9999
+          audiences: test-audience
+
+auth0:
+  domain: test.auth0.com
+  audience: test-audience

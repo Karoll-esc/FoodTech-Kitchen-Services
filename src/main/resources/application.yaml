@@ -1,3 +1,17 @@
 spring:
   application:
-    name: demo
+    name: foodtech-kitchen-service
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://${AUTH0_DOMAIN}/
+          audiences: ${AUTH0_AUDIENCE}
+
+# Auth0 Configuration
+# These values should be provided via environment variables or application-local.yaml
+# Never commit actual Auth0 credentials to version control
+auth0:
+  domain: ${AUTH0_DOMAIN:your-tenant.us.auth0.com}
+  audience: ${AUTH0_AUDIENCE:https://api.foodtech-kitchen.com}
