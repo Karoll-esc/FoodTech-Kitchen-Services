@@ -4,6 +4,8 @@ import com.foodtech.kitchen.application.exception.OrderNotFoundException;
 import com.foodtech.kitchen.application.exception.ProductAlreadyExistsException;
 import com.foodtech.kitchen.application.exception.ProductNotFoundException;
 import com.foodtech.kitchen.application.exception.StationAuthorizationException;
+import com.foodtech.kitchen.application.exception.TableAlreadyExistsException;
+import com.foodtech.kitchen.application.exception.TableNotFoundException;
 import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -195,11 +197,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
+    @ExceptionHandler(TableAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleTableAlreadyExists(TableAlreadyExistsException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Table number already exists",
+            ex.getMessage(),
+            HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(TableNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTableNotFound(TableNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Table not found",
+            ex.getMessage(),
+            HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(IllegalArgumentException ex) {
         ErrorResponse error = new ErrorResponse(
-            ex.getMessage(),
             "Validation failed",
+            ex.getMessage(),
             HttpStatus.BAD_REQUEST.value()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);

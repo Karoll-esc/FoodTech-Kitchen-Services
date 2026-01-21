@@ -7,10 +7,12 @@ import com.foodtech.kitchen.application.ports.in.*;
 import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.OrderRepository;
 import com.foodtech.kitchen.application.ports.out.ProductRepository;
+import com.foodtech.kitchen.application.ports.out.TableRepository;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.application.services.StationAuthorizationService;
 import com.foodtech.kitchen.application.usecases.*;
 import com.foodtech.kitchen.domain.services.*;
+import com.foodtech.kitchen.infrastructure.persistence.mappers.TableEntityMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -142,5 +144,41 @@ public class ApplicationConfig {
             ProductRepository productRepository
     ) {
         return new DeleteProductUseCase(productRepository);
+    }
+
+    // ============================================================================
+    // Table Management Use Cases (HU-005)
+    // ============================================================================
+
+    @Bean
+    public TableValidator tableValidator() {
+        return new TableValidator();
+    }
+
+    @Bean
+    public TableEntityMapper tableEntityMapper() {
+        return new TableEntityMapper();
+    }
+
+    @Bean
+    public CreateTableUseCase createTableUseCase(
+            com.foodtech.kitchen.application.ports.out.TableRepository tableRepository,
+            TableValidator tableValidator
+    ) {
+        return new CreateTableUseCase(tableRepository, tableValidator);
+    }
+
+    @Bean
+    public GetAllTablesUseCase getAllTablesUseCase(
+            com.foodtech.kitchen.application.ports.out.TableRepository tableRepository
+    ) {
+        return new GetAllTablesUseCase(tableRepository);
+    }
+
+    @Bean
+    public GetTableByIdUseCase getTableByIdUseCase(
+            com.foodtech.kitchen.application.ports.out.TableRepository tableRepository
+    ) {
+        return new GetTableByIdUseCase(tableRepository);
     }
 }

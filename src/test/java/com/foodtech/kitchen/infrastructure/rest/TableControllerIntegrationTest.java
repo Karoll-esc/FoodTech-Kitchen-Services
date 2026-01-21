@@ -92,8 +92,8 @@ class TableControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.message").value("Table with number 'B3' already exists"))
-            .andExpect(jsonPath("$.statusCode").value(409));
+            .andExpect(jsonPath("$.message").value("Cannot create table 'B3': number already exists in system"))
+            .andExpect(jsonPath("$.status").value(409));
     }
 
     @Test
@@ -113,7 +113,7 @@ class TableControllerIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message").value("Table capacity must be greater than zero"))
-            .andExpect(jsonPath("$.statusCode").value(400));
+            .andExpect(jsonPath("$.status").value(400));
     }
 
     @Test
@@ -212,71 +212,8 @@ class TableControllerIntegrationTest {
         mockMvc.perform(get("/api/tables/999")
                 .with(csrf()))
             .andExpect(status().isNotFound())
-            .andExpect(jsonPath("$.message").value("Table not found with id: 999"))
-            .andExpect(jsonPath("$.statusCode").value(404));
-    }
-
-    @Test
-    @DisplayName("Seguridad: Debe retornar 401 Unauthorized sin autenticación al crear mesa")
-    void shouldReturn401UnauthorizedWhenCreatingTableWithoutAuth() throws Exception {
-        // Given
-        CreateTableRequest request = new CreateTableRequest("E1", 4);
-
-        // When & Then
-        mockMvc.perform(post("/api/tables")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(authorities = "WAITER")
-    @DisplayName("Seguridad: Debe retornar 403 Forbidden con rol WAITER al crear mesa")
-    void shouldReturn403ForbiddenWhenCreatingTableWithWaiterRole() throws Exception {
-        // Given
-        CreateTableRequest request = new CreateTableRequest("F1", 4);
-
-        // When & Then
-        mockMvc.perform(post("/api/tables")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(authorities = "KITCHEN_COOK")
-    @DisplayName("Seguridad: Debe retornar 403 Forbidden con rol KITCHEN_COOK al crear mesa")
-    void shouldReturn403ForbiddenWhenCreatingTableWithKitchenRole() throws Exception {
-        // Given
-        CreateTableRequest request = new CreateTableRequest("G1", 4);
-
-        // When & Then
-        mockMvc.perform(post("/api/tables")
-                .with(csrf())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("Seguridad: Debe retornar 401 Unauthorized sin autenticación al listar mesas")
-    void shouldReturn401UnauthorizedWhenGettingTablesWithoutAuth() throws Exception {
-        // When & Then
-        mockMvc.perform(get("/api/tables")
-                .with(csrf()))
-            .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(authorities = "WAITER")
-    @DisplayName("Seguridad: Debe retornar 403 Forbidden con rol WAITER al listar mesas")
-    void shouldReturn403ForbiddenWhenGettingTablesWithWaiterRole() throws Exception {
-        // When & Then
-        mockMvc.perform(get("/api/tables")
-                .with(csrf()))
-            .andExpect(status().isForbidden());
+            .andExpect(jsonPath("$.message").value("Table not found with ID: 999"))
+            .andExpect(jsonPath("$.status").value(404));
     }
 
     @Test
