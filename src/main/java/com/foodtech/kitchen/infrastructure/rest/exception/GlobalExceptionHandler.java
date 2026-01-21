@@ -1,6 +1,8 @@
 package com.foodtech.kitchen.infrastructure.rest.exception;
 
 import com.foodtech.kitchen.application.exception.OrderNotFoundException;
+import com.foodtech.kitchen.application.exception.ProductAlreadyExistsException;
+import com.foodtech.kitchen.application.exception.ProductNotFoundException;
 import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -31,6 +33,26 @@ public class GlobalExceptionHandler {
             HttpStatus.NOT_FOUND.value()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Product not found",
+            ex.getMessage(),
+            HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    @ExceptionHandler(ProductAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleProductAlreadyExistsException(ProductAlreadyExistsException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Product already exists",
+            ex.getMessage(),
+            HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
