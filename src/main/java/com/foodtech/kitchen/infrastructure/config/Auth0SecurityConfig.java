@@ -48,13 +48,14 @@ import java.util.List;
  * - cold-kitchen-staff: View all tasks, update COLD_KITCHEN station tasks
  * - waiter: Create orders, view order status
  * 
- * Note: This configuration is disabled when running with 'test' profile.
- * Test profile uses TestSecurityConfig instead.
+ * Note: This configuration is disabled when running with 'test' or 'authorization-test' profiles.
+ * - 'test' profile uses TestSecurityConfig (security disabled for business logic tests)
+ * - 'authorization-test' profile uses AuthorizationTestSecurityConfig (method security enabled with @WithMockUser)
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
-@Profile("!test")
+@Profile("!test & !authorization-test")
 public class Auth0SecurityConfig {
 
     @Value("${auth0.audience}")

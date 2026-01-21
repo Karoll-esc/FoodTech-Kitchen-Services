@@ -1,0 +1,1383 @@
+{
+	"info": {
+		"_postman_id": "product-catalog-test-collection",
+		"name": "FoodTech Kitchen - Product Catalog Tests (HU-006)",
+		"description": "Comprehensive test collection for Product Catalog Management API endpoints.\n\n**Features Tested:**\n- Create new products (POST)\n- Retrieve product by ID (GET by ID)\n- List all products with filters (GET with query params)\n- Update product details (PUT)\n- Update product availability (PATCH)\n- Delete products (DELETE - idempotent)\n\n**Business Rules Validated:**\n- Product name uniqueness\n- Price must be positive\n- Preparation time must be positive\n- Product type validation (DRINK, HOT_DISH, COLD_DISH)\n- Proper HTTP status codes (201, 200, 204, 400, 404, 409)\n\n**Prerequisites:**\n1. Application running on localhost:8080\n2. H2 database configured (default setup)\n3. No authentication required (or configure bearer token if auth is enabled)\n\n**Test Execution Order:**\n1. Run \"1. Create Products\" folder to populate catalog\n2. Run \"2. Retrieve Products\" folder to test GET endpoints\n3. Run \"3. Update Products\" folder to test PUT/PATCH\n4. Run \"4. Error Scenarios\" folder to validate error handling\n5. Run \"5. Delete Products\" folder to test DELETE (run last)\n\n**Variables:**\n- `api_base_url`: API base URL (default: http://localhost:8080)\n- `product_id_1`, `product_id_2`, `product_id_3`: Saved product IDs from creation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Create Products",
+			"item": [
+				{
+					"name": "Create Product - Coca Cola (DRINK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has product ID\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"    pm.environment.set(\"product_id_1\", jsonData.id);",
+									"    console.log(\"✅ Product ID saved:\", jsonData.id);",
+									"});",
+									"",
+									"pm.test(\"Product name is correct\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql(\"Coca Cola\");",
+									"});",
+									"",
+									"pm.test(\"Product type is DRINK\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql(\"DRINK\");",
+									"});",
+									"",
+									"pm.test(\"Product is available by default\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.available).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Response includes timestamps\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.createdAt).to.exist;",
+									"    pm.expect(jsonData.updatedAt).to.exist;",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Coca Cola product created\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Coca Cola\",\n  \"description\": \"Refreshing carbonated soft drink\",\n  \"type\": \"DRINK\",\n  \"price\": 2.50,\n  \"preparationTimeSeconds\": 30\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Create a DRINK product with all required fields"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Hamburger (HOT_DISH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has product ID\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"    pm.environment.set(\"product_id_2\", jsonData.id);",
+									"    console.log(\"✅ Product ID saved:\", jsonData.id);",
+									"});",
+									"",
+									"pm.test(\"Product type is HOT_DISH\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql(\"HOT_DISH\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Hamburger product created\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Hamburger\",\n  \"description\": \"Juicy beef burger with fresh vegetables\",\n  \"type\": \"HOT_DISH\",\n  \"price\": 8.99,\n  \"preparationTimeSeconds\": 600\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Create a HOT_DISH product"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Caesar Salad (COLD_DISH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has product ID\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"    pm.environment.set(\"product_id_3\", jsonData.id);",
+									"    console.log(\"✅ Product ID saved:\", jsonData.id);",
+									"});",
+									"",
+									"pm.test(\"Product type is COLD_DISH\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.type).to.eql(\"COLD_DISH\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Caesar Salad product created\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Caesar Salad\",\n  \"description\": \"Fresh romaine lettuce with Caesar dressing and croutons\",\n  \"type\": \"COLD_DISH\",\n  \"price\": 6.50,\n  \"preparationTimeSeconds\": 180\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Create a COLD_DISH product"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Orange Juice (DRINK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Orange Juice product created\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Orange Juice\",\n  \"description\": \"Freshly squeezed orange juice\",\n  \"type\": \"DRINK\",\n  \"price\": 3.50,\n  \"preparationTimeSeconds\": 120\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Create another DRINK product for filtering tests"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Steak (HOT_DISH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 Created\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has product ID\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"product_id_unavailable\", jsonData.id);",
+									"    console.log(\"✅ Product ID for availability test saved:\", jsonData.id);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Steak product created\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Grilled Steak\",\n  \"description\": \"Premium beef steak grilled to perfection\",\n  \"type\": \"HOT_DISH\",\n  \"price\": 15.99,\n  \"preparationTimeSeconds\": 900\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Create HOT_DISH product that will be marked unavailable"
+					},
+					"response": []
+				}
+			],
+			"description": "Create multiple products to populate the catalog for testing"
+		},
+		{
+			"name": "2. Retrieve Products",
+			"item": [
+				{
+					"name": "Get Product by ID - Coca Cola",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Product name is Coca Cola\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql(\"Coca Cola\");",
+									"});",
+									"",
+									"pm.test(\"Response includes all fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.all.keys('id', 'name', 'description', 'type', 'price', 'preparationTimeSeconds', 'available', 'createdAt', 'updatedAt');",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Retrieved product by ID\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_1}}",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_1}}"
+							]
+						},
+						"description": "Retrieve a specific product by its ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Products (No Filters)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Array contains at least 5 products\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.at.least(5);",
+									"});",
+									"",
+									"pm.test(\"Each product has required fields\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.forEach(product => {",
+									"        pm.expect(product).to.have.property('id');",
+									"        pm.expect(product).to.have.property('name');",
+									"        pm.expect(product).to.have.property('type');",
+									"        pm.expect(product).to.have.property('price');",
+									"        pm.expect(product).to.have.property('available');",
+									"    });",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Retrieved all products\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Retrieve all products without any filters"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products - Filter by Type (DRINK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"All products are DRINK type\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.forEach(product => {",
+									"        pm.expect(product.type).to.eql(\"DRINK\");",
+									"    });",
+									"});",
+									"",
+									"pm.test(\"Contains Coca Cola and Orange Juice\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    const names = jsonData.map(p => p.name);",
+									"    pm.expect(names).to.include(\"Coca Cola\");",
+									"    pm.expect(names).to.include(\"Orange Juice\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Filtered products by DRINK type\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products?type=DRINK",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "DRINK"
+								}
+							]
+						},
+						"description": "Retrieve only DRINK products using type filter"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products - Filter by Type (HOT_DISH)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"All products are HOT_DISH type\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.forEach(product => {",
+									"        pm.expect(product.type).to.eql(\"HOT_DISH\");",
+									"    });",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Filtered products by HOT_DISH type\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products?type=HOT_DISH",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "HOT_DISH"
+								}
+							]
+						},
+						"description": "Retrieve only HOT_DISH products"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products - Filter by Available (true)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"All products are available\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.forEach(product => {",
+									"        pm.expect(product.available).to.be.true;",
+									"    });",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Filtered products by availability=true\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products?available=true",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "available",
+									"value": "true"
+								}
+							]
+						},
+						"description": "Retrieve only available products"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products - Combined Filters (available=true & type=DRINK)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"All products are available and DRINK type\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.forEach(product => {",
+									"        pm.expect(product.available).to.be.true;",
+									"        pm.expect(product.type).to.eql(\"DRINK\");",
+									"    });",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Applied combined filters\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products?available=true&type=DRINK",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "available",
+									"value": "true"
+								},
+								{
+									"key": "type",
+									"value": "DRINK"
+								}
+							]
+						},
+						"description": "Retrieve products with multiple filters applied"
+					},
+					"response": []
+				}
+			],
+			"description": "Test GET endpoints for retrieving products by ID and with filters"
+		},
+		{
+			"name": "3. Update Products",
+			"item": [
+				{
+					"name": "Update Product - Change Price and Description",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Price updated to 2.99\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.price).to.eql(2.99);",
+									"});",
+									"",
+									"pm.test(\"Description updated\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.description).to.include(\"Updated\");",
+									"});",
+									"",
+									"pm.test(\"updatedAt timestamp changed\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.updatedAt).to.exist;",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Product updated\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"description\": \"Updated: Refreshing carbonated soft drink - Now on sale!\",\n  \"price\": 2.99,\n  \"preparationTimeSeconds\": 45\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_1}}",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_1}}"
+							]
+						},
+						"description": "Update product's mutable fields (description, price, preparationTime)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product - Partial Update (Price Only)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Price updated to 7.99\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.price).to.eql(7.99);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Partial update successful\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": 7.99\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_3}}",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_3}}"
+							]
+						},
+						"description": "Partial update - only change price, leave other fields unchanged"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Availability - Mark as Unavailable",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Product is now unavailable\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.available).to.be.false;",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Product marked as unavailable\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"available\": false\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_unavailable}}/availability",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_unavailable}}",
+								"availability"
+							]
+						},
+						"description": "Change product availability status (out of stock)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products - Filter by Available (false)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contains unavailable products\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.length).to.be.at.least(1);",
+									"});",
+									"",
+									"pm.test(\"All products are unavailable\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    jsonData.forEach(product => {",
+									"        pm.expect(product.available).to.be.false;",
+									"    });",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Filtered unavailable products\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products?available=false",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "available",
+									"value": "false"
+								}
+							]
+						},
+						"description": "Verify that unavailable products can be filtered"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product Availability - Mark as Available Again",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 OK\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Product is available again\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.available).to.be.true;",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Product marked as available\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"available\": true\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_unavailable}}/availability",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_unavailable}}",
+								"availability"
+							]
+						},
+						"description": "Re-enable product availability (back in stock)"
+					},
+					"response": []
+				}
+			],
+			"description": "Test PUT and PATCH endpoints for updating product details and availability"
+		},
+		{
+			"name": "4. Error Scenarios",
+			"item": [
+				{
+					"name": "Create Product - Duplicate Name (409 Conflict)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates duplicate\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include(\"already exists\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Duplicate name correctly rejected\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Coca Cola\",\n  \"description\": \"Another Coca Cola - should fail\",\n  \"type\": \"DRINK\",\n  \"price\": 2.50,\n  \"preparationTimeSeconds\": 30\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Attempt to create product with duplicate name - should fail with 409"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Invalid Price (400 Bad Request)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates validation failure\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"Validation failed\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Negative price correctly rejected\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Invalid Product\",\n  \"description\": \"Product with negative price\",\n  \"type\": \"DRINK\",\n  \"price\": -5.00,\n  \"preparationTimeSeconds\": 30\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Attempt to create product with negative price - should fail with 400"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Invalid Preparation Time (400 Bad Request)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Negative preparation time rejected\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Invalid Prep Time Product\",\n  \"description\": \"Product with negative prep time\",\n  \"type\": \"DRINK\",\n  \"price\": 2.50,\n  \"preparationTimeSeconds\": -30\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Attempt to create product with negative preparation time - should fail with 400"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Product - Empty Name (400 Bad Request)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Empty name correctly rejected\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"\",\n  \"description\": \"Product with empty name\",\n  \"type\": \"DRINK\",\n  \"price\": 2.50,\n  \"preparationTimeSeconds\": 30\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							]
+						},
+						"description": "Attempt to create product with empty name - should fail with 400"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Product by ID - Not Found (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates product not found\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include(\"not found\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Non-existent product correctly returns 404\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products/99999",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"99999"
+							]
+						},
+						"description": "Attempt to retrieve non-existent product - should return 404"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product - Not Found (404)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Update non-existent product returns 404\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": 10.00\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products/99999",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"99999"
+							]
+						},
+						"description": "Attempt to update non-existent product - should return 404"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Product - Negative Price (400 Bad Request)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Update with negative price rejected\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"price\": -10.00\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_1}}",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_1}}"
+							]
+						},
+						"description": "Attempt to update product with negative price - should fail with 400"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Products - Invalid Type (400 Bad Request)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Invalid type parameter rejected\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products?type=INVALID_TYPE",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "INVALID_TYPE"
+								}
+							]
+						},
+						"description": "Attempt to filter by invalid product type - should return 400"
+					},
+					"response": []
+				}
+			],
+			"description": "Test error handling and validation (400, 404, 409 status codes)"
+		},
+		{
+			"name": "5. Delete Products",
+			"item": [
+				{
+					"name": "Delete Product - Success (204 No Content)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"Response body is empty\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Product deleted\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_2}}",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_2}}"
+							]
+						},
+						"description": "Delete a product - should return 204 No Content"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Product Deleted (404 Not Found)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Deleted product is not found\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_2}}",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_2}}"
+							]
+						},
+						"description": "Verify that deleted product no longer exists"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product - Idempotent (204 for Non-Existent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"pm.test(\"DELETE is idempotent\", function () {",
+									"    pm.expect(pm.response.text()).to.be.empty;",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: DELETE is idempotent (204 even for non-existent product)\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products/99999",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"99999"
+							]
+						},
+						"description": "Delete non-existent product - should still return 204 (idempotent behavior)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Product - Already Deleted (Idempotent)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 No Content\", function () {",
+									"    pm.response.to.have.status(204);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Deleting already deleted product returns 204\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/products/{{product_id_2}}",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"{{product_id_2}}"
+							]
+						},
+						"description": "Delete same product again - should return 204 (idempotent)"
+					},
+					"response": []
+				}
+			],
+			"description": "Test DELETE endpoint and verify idempotent behavior (run this folder last)"
+		}
+	],
+	"variable": [
+		{
+			"key": "api_base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

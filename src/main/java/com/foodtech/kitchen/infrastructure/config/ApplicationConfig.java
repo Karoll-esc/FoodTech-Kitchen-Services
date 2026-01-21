@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.foodtech.kitchen.application.ports.in.*;
 import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.OrderRepository;
+import com.foodtech.kitchen.application.ports.out.ProductRepository;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.application.services.StationAuthorizationService;
 import com.foodtech.kitchen.application.usecases.*;
@@ -88,5 +89,58 @@ public class ApplicationConfig {
     @Bean
     public StationAuthorizationService stationAuthorizationService() {
         return new StationAuthorizationService();
+    }
+
+    // ============================================================================
+    // Product Catalog Use Cases (HU-006)
+    // ============================================================================
+
+    @Bean
+    public ProductValidator productValidator() {
+        return new ProductValidator();
+    }
+
+    @Bean
+    public CreateProductUseCase createProductUseCase(
+            ProductRepository productRepository,
+            ProductValidator productValidator
+    ) {
+        return new CreateProductUseCase(productRepository, productValidator);
+    }
+
+    @Bean
+    public GetProductByIdUseCase getProductByIdUseCase(
+            ProductRepository productRepository
+    ) {
+        return new GetProductByIdUseCase(productRepository);
+    }
+
+    @Bean
+    public GetProductsUseCase getProductsUseCase(
+            ProductRepository productRepository
+    ) {
+        return new GetProductsUseCase(productRepository);
+    }
+
+    @Bean
+    public UpdateProductUseCase updateProductUseCase(
+            ProductRepository productRepository,
+            ProductValidator productValidator
+    ) {
+        return new UpdateProductUseCase(productRepository, productValidator);
+    }
+
+    @Bean
+    public UpdateProductAvailabilityUseCase updateProductAvailabilityUseCase(
+            ProductRepository productRepository
+    ) {
+        return new UpdateProductAvailabilityUseCase(productRepository);
+    }
+
+    @Bean
+    public DeleteProductUseCase deleteProductUseCase(
+            ProductRepository productRepository
+    ) {
+        return new DeleteProductUseCase(productRepository);
     }
 }
