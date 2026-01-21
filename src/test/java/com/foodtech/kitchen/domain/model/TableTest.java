@@ -224,7 +224,23 @@ class TableTest {
             () -> table.assignOrder(123L)
         );
         
-        assertEquals("Cannot assign order to non-available table", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Cannot assign order to non-available table"));
+        assertTrue(exception.getMessage().contains("Current status: OCCUPIED"));
+    }
+    
+    @Test
+    @DisplayName("Debe lanzar excepción al asignar pedido null")
+    void shouldThrowExceptionWhenAssigningNullOrderId() {
+        // Given
+        Table table = new Table("A1", 4);
+        
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> table.assignOrder(null)
+        );
+        
+        assertEquals("Order ID cannot be null", exception.getMessage());
     }
     
     @Test

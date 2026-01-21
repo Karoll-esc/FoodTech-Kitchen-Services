@@ -168,4 +168,19 @@ class TableStatusTest {
         // Then
         assertFalse(canTransition, "Should not allow transition from CLEANING to SERVED");
     }
+    
+    @Test
+    @DisplayName("Debe lanzar excepción cuando newStatus es null")
+    void shouldThrowExceptionWhenNewStatusIsNull() {
+        // Given
+        TableStatus status = TableStatus.AVAILABLE;
+        
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> status.canTransitionTo(null)
+        );
+        
+        assertEquals("New status cannot be null", exception.getMessage());
+    }
 }
