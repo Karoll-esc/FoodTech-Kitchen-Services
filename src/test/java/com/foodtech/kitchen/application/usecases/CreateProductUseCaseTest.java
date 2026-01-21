@@ -103,25 +103,25 @@ class CreateProductUseCaseTest {
     @DisplayName("Debe validar el producto antes de verificar duplicados")
     void shouldValidateProductBeforeCheckingDuplicates() {
         // Given
-        Product invalidProduct = new Product(
-            "",
-            "Descripción",
+        Product product = new Product(
+            "Coca Cola",
+            "Bebida gaseosa",
             ProductType.DRINK,
             new Price(new BigDecimal("5.00")),
             30
         );
 
         doThrow(new IllegalArgumentException("Product name cannot be null or empty"))
-            .when(productValidator).validate(invalidProduct);
+            .when(productValidator).validate(product);
 
         // When & Then
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> createProductUseCase.execute(invalidProduct)
+            () -> createProductUseCase.execute(product)
         );
 
         assertEquals("Product name cannot be null or empty", exception.getMessage());
-        verify(productValidator, times(1)).validate(invalidProduct);
+        verify(productValidator, times(1)).validate(product);
         verify(productRepository, never()).existsByName(anyString());
         verify(productRepository, never()).save(any());
     }
