@@ -298,117 +298,74 @@ Scenario: Consulta de información del usuario autenticado
 
 ---
 
-## HU-005: Gestión del ciclo de vida de las mesas
+# HU-005: Gestión administrativa de mesas
 
 ### Descripción
 
-**Como** mesero  
-**Quiero** gestionar el estado de las mesas del restaurante a lo largo de su ciclo de vida  
-**Para** coordinar eficientemente la ocupación, servicio y limpieza de las mesas
+**Como** administrador del restaurante
+**Quiero** registrar y consultar las mesas físicas del establecimiento
+**Para** configurar la infraestructura del salón antes de iniciar la operación diaria
+
+> **Nota:** Esta historia cubre exclusivamente la **configuración inicial** y el inventario de mesas. El flujo operativo de servicio (cambios de estado por pedidos, limpieza y ocupación) se detalla en la **HU-007**.
+
+### Reglas de Negocio
+
+* **Identificador Único:** Cada mesa debe tener un número o código de identificación que no se repita en el sistema.
+* **Capacidad Mínima:** La capacidad de comensales por mesa debe ser un número entero mayor a **0**.
+* **Estado por Defecto:** Toda mesa nueva debe iniciar automáticamente con el estado `AVAILABLE`.
+* **Integridad:** Al crearse, la mesa no debe tener ningún `currentOrderId` asociado.
+
+---
 
 ### Criterios de Aceptación
 
-#### Escenario 1: Crear nueva mesa en el sistema
+#### Escenario 1: Registro exitoso de una nueva mesa
 
 ```gherkin
-Scenario: Administrador registra una nueva mesa
+Scenario: Administrador registra una nueva mesa válida
   Given que existe un usuario autenticado con rol "ADMIN"
-  And no existe una mesa con número "A1"
+  And no existe una mesa con número "A1" en el sistema
   When el administrador crea una mesa con número "A1" y capacidad para 4 personas
-  Then el sistema crea la mesa con estado inicial "AVAILABLE"
-  And el sistema registra la fecha y hora de creación
-  And el sistema confirma la creación exitosa
+  Then el sistema registra la mesa exitosamente
+  And la mesa queda con estado inicial "AVAILABLE"
+  And la mesa no tiene ningún pedido asociado
+  And el sistema confirma la creación con un mensaje de éxito
+
 ```
 
-#### Escenario 2: Mesa no puede ser creada con número duplicado
+#### Escenario 2: Restricción de números de mesa duplicados
 
 ```gherkin
-Scenario: Intento de crear mesa con número ya existente
-  Given que existe una mesa registrada con número "B3"
-  When el administrador intenta crear otra mesa con número "B3"
-  Then el sistema rechaza la operación con un mensaje de error
+Scenario: Intento de registro de mesa con número ya existente
+  Given que existe un usuario autenticado con rol "ADMIN"
+  And ya existe una mesa registrada con número "B3"
+  When el administrador intenta crear otra mesa con el mismo número "B3"
+  Then el sistema rechaza la operación
   And el sistema informa que ya existe una mesa con ese número
+
 ```
 
-#### Escenario 3: Mesa cambia automáticamente a OCCUPIED al crear pedido
+#### Escenario 3: Validación de capacidad permitida
 
 ```gherkin
-Scenario: Creación de pedido ocupa la mesa automáticamente
-  Given que existe una mesa "C5" con estado "AVAILABLE"
-  When un mesero crea un pedido para la mesa "C5"
-  Then el sistema cambia el estado de la mesa a "OCCUPIED"
-  And el sistema registra el ID del pedido en la mesa
-  And el sistema registra la fecha y hora del cambio de estado
+Scenario: Registro de mesa con capacidad inválida
+  Given que el administrador intenta registrar una nueva mesa
+  When ingresa una capacidad de 0 o un valor negativo
+  Then el sistema rechaza la solicitud de creación
+  And el sistema notifica que la capacidad debe ser mayor a 0
+
 ```
 
-#### Escenario 4: Mesa cambia automáticamente a SERVED cuando todas las tareas están completas
+#### Escenario 4: Consulta del catálogo de mesas configuradas
 
 ```gherkin
-Scenario: Pedido completo marca mesa como servida
-  Given que existe una mesa "A2" con estado "OCCUPIED"
-  And el pedido de la mesa generó 3 tareas
-  And 2 tareas ya están en estado "COMPLETED"
-  And 1 tarea está en estado "IN_PREPARATION"
-  When la última tarea cambia a estado "COMPLETED"
-  Then el sistema cambia automáticamente el estado de la mesa a "SERVED"
-  And el sistema registra la fecha y hora del cambio
+Scenario: Visualización del listado de mesas para fines administrativos
+  Given que el sistema tiene 5 mesas registradas
+  When el administrador consulta la lista global de mesas
+  Then el sistema muestra la información completa de las 5 mesas
+  And cada registro incluye: número de mesa, capacidad, estado actual y fecha de creación
+
 ```
-
-#### Escenario 5: Mesero marca mesa en limpieza después de que los clientes se van
-
-```gherkin
-Scenario: Transición de mesa servida a limpieza
-  Given que existe una mesa "D1" con estado "SERVED"
-  And los clientes han terminado de comer y se han retirado
-  When el mesero cambia el estado de la mesa a "CLEANING"
-  Then el sistema actualiza el estado de la mesa
-  And el sistema confirma la actualización exitosa
-```
-
-#### Escenario 6: Mesero marca mesa como disponible después de limpiarla
-
-```gherkin
-Scenario: Mesa queda disponible después de limpieza
-  Given que existe una mesa "E3" con estado "CLEANING"
-  When el mesero cambia el estado de la mesa a "AVAILABLE"
-  Then el sistema actualiza el estado de la mesa
-  And el campo "currentOrderId" se establece en null
-  And la mesa queda lista para recibir nuevos clientes
-```
-
-#### Escenario 7: No se pueden saltar estados en el flujo de vida de la mesa
-
-```gherkin
-Scenario: Validación de transiciones de estado válidas
-  Given que existe una mesa con estado "AVAILABLE"
-  When el mesero intenta cambiar directamente el estado a "CLEANING"
-  Then el sistema rechaza la operación con un mensaje de error
-  And el sistema informa que la transición no es válida
-```
-
-#### Escenario 8: Mesero consulta solo mesas disponibles
-
-```gherkin
-Scenario: Filtrado de mesas por estado disponible
-  Given que existen 10 mesas en el sistema
-  And 3 mesas están en estado "AVAILABLE"
-  And el resto están en otros estados
-  When el mesero consulta las mesas disponibles
-  Then el sistema muestra las 3 mesas disponibles
-  And no se incluyen mesas en otros estados
-```
-
-#### Escenario 9: Consulta de todas las mesas con su estado actual
-
-```gherkin
-Scenario: Visualización del estado de todas las mesas
-  Given que existen 15 mesas en el sistema en diferentes estados
-  When el mesero consulta todas las mesas
-  Then el sistema muestra la lista completa de mesas
-  And cada mesa incluye: número, estado, capacidad, ID del pedido actual (si aplica)
-  And cada mesa incluye la fecha del último cambio de estado
-```
-
 ---
 
 ## HU-006: Gestión del catálogo de productos
@@ -538,3 +495,100 @@ Scenario: Precio siempre presente en respuestas de productos
   And el precio está formateado con 2 decimales
   And el precio es mayor o igual a 0.00
 ```
+
+---
+
+# HU-007: Gestión del ciclo de vida de las mesas
+
+### Descripción
+
+**Como** sistema de gestión del restaurante
+**Quiero** automatizar y controlar el cambio de estado de las mesas según los eventos del servicio
+**Para** garantizar que la disponibilidad y el flujo operativo se reflejen correctamente en tiempo real
+
+> **Nota:** Esta historia se centra exclusivamente en la **lógica de transición y validación de estados**. La creación administrativa de las mesas se cubre en la **HU-005**.
+
+---
+
+### Reglas de Negocio
+
+* **Estado Único:** Una mesa solo puede residir en un estado a la vez.
+* **Estados Válidos:** Los estados permitidos son `AVAILABLE`, `OCCUPIED`, `SERVED` y `CLEANING`.
+* **Flujo de Transición:** El sistema debe restringir los cambios de estado para seguir estrictamente el flujo operativo:
+1. `AVAILABLE` → `OCCUPIED` (Al crear pedido)
+2. `OCCUPIED` → `SERVED` (Al completar todas las tareas de cocina/barra)
+3. `SERVED` → `CLEANING` (Al retirarse los clientes)
+4. `CLEANING` → `AVAILABLE` (Al finalizar la limpieza)
+
+
+---
+
+### Criterios de Aceptación
+
+#### Escenario 1: Estado inicial por defecto
+
+```gherkin
+Scenario: Una mesa nueva siempre inicia disponible
+  Given que un administrador registra una nueva mesa en el sistema
+  When el registro es completado exitosamente
+  Then la mesa debe tener el estado inicial "AVAILABLE"
+  And no debe tener ningún "currentOrderId" asociado
+
+```
+
+#### Escenario 2: Cambio automático a OCCUPIED
+
+```gherkin
+Scenario: La mesa se ocupa al recibir un pedido
+  Given que existe una mesa en estado "AVAILABLE"
+  When se registra un nuevo pedido vinculado a dicha mesa
+  Then el sistema cambia el estado de la mesa a "OCCUPIED"
+  And el ID del pedido queda registrado en la mesa
+
+```
+
+#### Escenario 3: Cambio automático a SERVED
+
+```gherkin
+Scenario: La mesa se marca como servida tras completar la cocina
+  Given que existe una mesa en estado "OCCUPIED"
+  And el pedido de la mesa tiene tareas pendientes o en preparación
+  When la última tarea del pedido cambia al estado "COMPLETED"
+  Then el sistema cambia automáticamente el estado de la mesa a "SERVED"
+
+```
+
+#### Escenario 4: Transición manual a CLEANING
+
+```gherkin
+Scenario: El personal marca la mesa para limpieza
+  Given que una mesa está en estado "SERVED"
+  And los clientes han abandonado la mesa
+  When el mesero indica que la mesa requiere limpieza
+  Then el sistema actualiza el estado de la mesa a "CLEANING"
+
+```
+
+#### Escenario 5: Retorno a disponibilidad
+
+```gherkin
+Scenario: La mesa queda lista para nuevos clientes
+  Given que una mesa está en estado "CLEANING"
+  When el personal confirma que la limpieza ha finalizado
+  Then el sistema cambia el estado de la mesa a "AVAILABLE"
+  And el campo "currentOrderId" se limpia (vuelve a null)
+
+```
+
+#### Escenario 6: Validación de flujo (Transición Inválida)
+
+```gherkin
+Scenario: Bloqueo de saltos de estado no permitidos
+  Given que existe una mesa en estado "AVAILABLE"
+  When se intenta forzar el cambio de estado a "CLEANING" sin pasar por OCCUPIED
+  Then el sistema rechaza la operación
+  And notifica que la transición de estado no es válida
+
+```
+
+---
