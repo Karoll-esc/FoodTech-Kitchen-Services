@@ -1,0 +1,1021 @@
+{
+	"info": {
+		"_postman_id": "station-auth-test-collection",
+		"name": "FoodTech Kitchen - Station Authorization Tests",
+		"description": "Collection to test station-based authorization for kitchen staff.\n\n**Business Rules:**\n- Bar staff can ONLY update BAR station tasks\n- Hot kitchen staff can ONLY update HOT_KITCHEN station tasks\n- Cold kitchen staff can ONLY update COLD_KITCHEN station tasks\n- Admin can update ANY station tasks\n\n**Prerequisites:**\n1. Auth0 tenant configured\n2. Test users created with appropriate roles\n3. Application running on localhost:8080\n\n**Variables to Set:**\n- `auth0_domain`: Your Auth0 domain (e.g., dev-xyz.us.auth0.com)\n- `auth0_client_id`: Your Auth0 application client ID\n- `auth0_client_secret`: Your Auth0 application client secret\n- `auth0_audience`: Your API audience (e.g., https://kitchen-service-api)\n- `api_base_url`: Your API base URL (default: http://localhost:8080)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup - Get Tokens",
+			"item": [
+				{
+					"name": "Get Token - Admin User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"admin_token\", jsonData.access_token);",
+									"    console.log(\"Admin token saved:\", jsonData.access_token.substring(0, 20) + \"...\");",
+									"} else {",
+									"    console.error(\"Failed to get admin token:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"grant_type\": \"password\",\n  \"username\": \"admin@foodtech.com\",\n  \"password\": \"YOUR_ADMIN_PASSWORD\",\n  \"client_id\": \"{{auth0_client_id}}\",\n  \"client_secret\": \"{{auth0_client_secret}}\",\n  \"audience\": \"{{auth0_audience}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{auth0_domain}}/oauth/token",
+							"protocol": "https",
+							"host": [
+								"{{auth0_domain}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Get Auth0 token for admin user (has admin:all permission)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Token - Bar Staff",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"bar_staff_token\", jsonData.access_token);",
+									"    console.log(\"Bar staff token saved:\", jsonData.access_token.substring(0, 20) + \"...\");",
+									"} else {",
+									"    console.error(\"Failed to get bar staff token:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"grant_type\": \"password\",\n  \"username\": \"bar-staff@foodtech.com\",\n  \"password\": \"YOUR_BAR_STAFF_PASSWORD\",\n  \"client_id\": \"{{auth0_client_id}}\",\n  \"client_secret\": \"{{auth0_client_secret}}\",\n  \"audience\": \"{{auth0_audience}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{auth0_domain}}/oauth/token",
+							"protocol": "https",
+							"host": [
+								"{{auth0_domain}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Get Auth0 token for bar staff (has update:tasks:bar permission)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Token - Hot Kitchen Staff",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"hot_kitchen_token\", jsonData.access_token);",
+									"    console.log(\"Hot kitchen token saved:\", jsonData.access_token.substring(0, 20) + \"...\");",
+									"} else {",
+									"    console.error(\"Failed to get hot kitchen token:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"grant_type\": \"password\",\n  \"username\": \"hot-kitchen@foodtech.com\",\n  \"password\": \"YOUR_HOT_KITCHEN_PASSWORD\",\n  \"client_id\": \"{{auth0_client_id}}\",\n  \"client_secret\": \"{{auth0_client_secret}}\",\n  \"audience\": \"{{auth0_audience}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{auth0_domain}}/oauth/token",
+							"protocol": "https",
+							"host": [
+								"{{auth0_domain}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Get Auth0 token for hot kitchen staff (has update:tasks:hot-kitchen permission)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Token - Cold Kitchen Staff",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const jsonData = pm.response.json();",
+									"    pm.environment.set(\"cold_kitchen_token\", jsonData.access_token);",
+									"    console.log(\"Cold kitchen token saved:\", jsonData.access_token.substring(0, 20) + \"...\");",
+									"} else {",
+									"    console.error(\"Failed to get cold kitchen token:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"grant_type\": \"password\",\n  \"username\": \"cold-kitchen@foodtech.com\",\n  \"password\": \"YOUR_COLD_KITCHEN_PASSWORD\",\n  \"client_id\": \"{{auth0_client_id}}\",\n  \"client_secret\": \"{{auth0_client_secret}}\",\n  \"audience\": \"{{auth0_audience}}\"\n}"
+						},
+						"url": {
+							"raw": "https://{{auth0_domain}}/oauth/token",
+							"protocol": "https",
+							"host": [
+								"{{auth0_domain}}"
+							],
+							"path": [
+								"oauth",
+								"token"
+							]
+						},
+						"description": "Get Auth0 token for cold kitchen staff (has update:tasks:cold-kitchen permission)"
+					},
+					"response": []
+				}
+			],
+			"description": "Get Auth0 tokens for different user roles. Run these first to populate environment variables with tokens."
+		},
+		{
+			"name": "Test Data Setup",
+			"item": [
+				{
+					"name": "Create Order with Mixed Products",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    console.log(\"Order created successfully\");",
+									"    const jsonData = pm.response.json();",
+									"    console.log(\"Tasks created:\", jsonData.tasksCreated);",
+									"} else {",
+									"    console.error(\"Failed to create order:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tableNumber\": \"A1\",\n  \"products\": [\n    {\n      \"name\": \"Coca Cola\",\n      \"type\": \"DRINK\"\n    },\n    {\n      \"name\": \"Hamburger\",\n      \"type\": \"HOT_DISH\"\n    },\n    {\n      \"name\": \"Caesar Salad\",\n      \"type\": \"COLD_DISH\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{api_base_url}}/api/orders",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						},
+						"description": "Create an order with products for all 3 stations (BAR, HOT_KITCHEN, COLD_KITCHEN)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get BAR Tasks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const tasks = pm.response.json();",
+									"    if (tasks.length > 0) {",
+									"        pm.environment.set(\"bar_task_id\", tasks[0].id);",
+									"        console.log(\"Bar task ID saved:\", tasks[0].id);",
+									"    }",
+									"} else {",
+									"    console.error(\"Failed to get BAR tasks:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/station/BAR",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"station",
+								"BAR"
+							]
+						},
+						"description": "Get tasks for BAR station and save first task ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get HOT_KITCHEN Tasks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const tasks = pm.response.json();",
+									"    if (tasks.length > 0) {",
+									"        pm.environment.set(\"hot_kitchen_task_id\", tasks[0].id);",
+									"        console.log(\"Hot kitchen task ID saved:\", tasks[0].id);",
+									"    }",
+									"} else {",
+									"    console.error(\"Failed to get HOT_KITCHEN tasks:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/station/HOT_KITCHEN",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"station",
+								"HOT_KITCHEN"
+							]
+						},
+						"description": "Get tasks for HOT_KITCHEN station and save first task ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Get COLD_KITCHEN Tasks",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    const tasks = pm.response.json();",
+									"    if (tasks.length > 0) {",
+									"        pm.environment.set(\"cold_kitchen_task_id\", tasks[0].id);",
+									"        console.log(\"Cold kitchen task ID saved:\", tasks[0].id);",
+									"    }",
+									"} else {",
+									"    console.error(\"Failed to get COLD_KITCHEN tasks:\", pm.response.text());",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/station/COLD_KITCHEN",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"station",
+								"COLD_KITCHEN"
+							]
+						},
+						"description": "Get tasks for COLD_KITCHEN station and save first task ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Create test data (orders and tasks) needed for authorization tests"
+		},
+		{
+			"name": "Authorization Tests - Bar Staff",
+			"item": [
+				{
+					"name": "✅ Bar Staff - Update BAR Task (SHOULD SUCCEED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Task status updated to IN_PREPARATION\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"IN_PREPARATION\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Bar staff can update BAR tasks\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bar_staff_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{bar_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{bar_task_id}}",
+								"start"
+							]
+						},
+						"description": "Bar staff updating a BAR station task - SHOULD SUCCEED (200 OK)"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Bar Staff - Update HOT_KITCHEN Task (SHOULD FAIL)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates authorization failure\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"not authorized\");",
+									"    pm.expect(jsonData.message).to.include(\"HOT_KITCHEN\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Bar staff correctly denied access to HOT_KITCHEN\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bar_staff_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{hot_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{hot_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Bar staff trying to update HOT_KITCHEN task - SHOULD FAIL (403 Forbidden)"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Bar Staff - Update COLD_KITCHEN Task (SHOULD FAIL)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test(\"Error message indicates authorization failure\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"not authorized\");",
+									"    pm.expect(jsonData.message).to.include(\"COLD_KITCHEN\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Bar staff correctly denied access to COLD_KITCHEN\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{bar_staff_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{cold_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{cold_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Bar staff trying to update COLD_KITCHEN task - SHOULD FAIL (403 Forbidden)"
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for bar staff authorization (has update:tasks:bar permission)"
+		},
+		{
+			"name": "Authorization Tests - Hot Kitchen Staff",
+			"item": [
+				{
+					"name": "❌ Hot Kitchen - Update BAR Task (SHOULD FAIL)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Hot kitchen staff correctly denied access to BAR\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{hot_kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{bar_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{bar_task_id}}",
+								"start"
+							]
+						},
+						"description": "Hot kitchen staff trying to update BAR task - SHOULD FAIL (403 Forbidden)"
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Hot Kitchen - Update HOT_KITCHEN Task (SHOULD SUCCEED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Task status updated to IN_PREPARATION\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"IN_PREPARATION\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Hot kitchen staff can update HOT_KITCHEN tasks\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{hot_kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{hot_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{hot_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Hot kitchen staff updating HOT_KITCHEN task - SHOULD SUCCEED (200 OK)"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Hot Kitchen - Update COLD_KITCHEN Task (SHOULD FAIL)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Hot kitchen staff correctly denied access to COLD_KITCHEN\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{hot_kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{cold_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{cold_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Hot kitchen staff trying to update COLD_KITCHEN task - SHOULD FAIL (403 Forbidden)"
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for hot kitchen staff authorization (has update:tasks:hot-kitchen permission)"
+		},
+		{
+			"name": "Authorization Tests - Cold Kitchen Staff",
+			"item": [
+				{
+					"name": "❌ Cold Kitchen - Update BAR Task (SHOULD FAIL)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Cold kitchen staff correctly denied access to BAR\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cold_kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{bar_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{bar_task_id}}",
+								"start"
+							]
+						},
+						"description": "Cold kitchen staff trying to update BAR task - SHOULD FAIL (403 Forbidden)"
+					},
+					"response": []
+				},
+				{
+					"name": "❌ Cold Kitchen - Update HOT_KITCHEN Task (SHOULD FAIL)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Cold kitchen staff correctly denied access to HOT_KITCHEN\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cold_kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{hot_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{hot_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Cold kitchen staff trying to update HOT_KITCHEN task - SHOULD FAIL (403 Forbidden)"
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Cold Kitchen - Update COLD_KITCHEN Task (SHOULD SUCCEED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Task status updated to IN_PREPARATION\", function () {",
+									"    const jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"IN_PREPARATION\");",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Cold kitchen staff can update COLD_KITCHEN tasks\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{cold_kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{cold_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{cold_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Cold kitchen staff updating COLD_KITCHEN task - SHOULD SUCCEED (200 OK)"
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for cold kitchen staff authorization (has update:tasks:cold-kitchen permission)"
+		},
+		{
+			"name": "Authorization Tests - Admin",
+			"item": [
+				{
+					"name": "✅ Admin - Update BAR Task (SHOULD SUCCEED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Admin can update BAR tasks\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{bar_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{bar_task_id}}",
+								"start"
+							]
+						},
+						"description": "Admin updating BAR task - SHOULD SUCCEED (admin has access to all stations)"
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Admin - Update HOT_KITCHEN Task (SHOULD SUCCEED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Admin can update HOT_KITCHEN tasks\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{hot_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{hot_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Admin updating HOT_KITCHEN task - SHOULD SUCCEED (admin has access to all stations)"
+					},
+					"response": []
+				},
+				{
+					"name": "✅ Admin - Update COLD_KITCHEN Task (SHOULD SUCCEED)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"console.log(\"✅ SUCCESS: Admin can update COLD_KITCHEN tasks\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{api_base_url}}/api/tasks/{{cold_kitchen_task_id}}/start",
+							"host": [
+								"{{api_base_url}}"
+							],
+							"path": [
+								"api",
+								"tasks",
+								"{{cold_kitchen_task_id}}",
+								"start"
+							]
+						},
+						"description": "Admin updating COLD_KITCHEN task - SHOULD SUCCEED (admin has access to all stations)"
+					},
+					"response": []
+				}
+			],
+			"description": "Tests for admin authorization (has admin:all permission, can access all stations)"
+		}
+	],
+	"variable": [
+		{
+			"key": "api_base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}
