@@ -1,6 +1,8 @@
 package com.foodtech.kitchen.infrastructure.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.foodtech.kitchen.infrastructure.persistence.jpa.ProductJpaRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,15 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private ProductJpaRepository productJpaRepository;
+
+    @BeforeEach
+    void setUp() {
+        // Clean product catalog before each test for isolation
+        productJpaRepository.deleteAll();
+    }
 
     // ============================================================================
     // POST /api/products - Create Product
