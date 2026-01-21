@@ -8,8 +8,10 @@ import com.foodtech.kitchen.domain.model.TaskStatus;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderRequest;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateOrderResponse;
 import com.foodtech.kitchen.infrastructure.rest.mapper.OrderMapper;
+import com.foodtech.kitchen.infrastructure.security.Permissions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +33,7 @@ public class OrderController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('" + Permissions.CREATE_ORDERS + "')")
     public ResponseEntity<CreateOrderResponse> createOrder(@RequestBody CreateOrderRequest request) {
         Order order = OrderMapper.toDomain(request);
         List<Task> tasks = processOrderPort.execute(order);
@@ -44,6 +47,7 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}/status")
+    @PreAuthorize("hasAuthority('" + Permissions.READ_ORDERS + "')")
     public ResponseEntity<Map<String, String>> getOrderStatus(@PathVariable Long orderId) {
         TaskStatus status = getOrderStatusPort.execute(orderId);
         return ResponseEntity.ok(Map.of(

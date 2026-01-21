@@ -31,7 +31,7 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @TestConfiguration
 @EnableWebSecurity
-@EnableMethodSecurity(prePostEnabled = true)
+@EnableMethodSecurity(prePostEnabled = false)
 @EnableAutoConfiguration(exclude = {OAuth2ResourceServerAutoConfiguration.class})
 public class TestSecurityConfig {
 

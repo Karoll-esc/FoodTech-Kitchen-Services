@@ -8,7 +8,9 @@ import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.model.TaskStatus;
 import com.foodtech.kitchen.infrastructure.rest.dto.TaskResponse;
 import com.foodtech.kitchen.infrastructure.rest.mapper.TaskMapper;
+import com.foodtech.kitchen.infrastructure.security.Permissions;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +32,7 @@ public class TaskController {
     }
 
     @GetMapping("/station/{station}")
+    @PreAuthorize("hasAuthority('" + Permissions.READ_TASKS + "')")
     public ResponseEntity<List<TaskResponse>> getTasksByStation(
             @PathVariable Station station,
             @RequestParam(required = false) TaskStatus status) {
@@ -44,7 +47,9 @@ public class TaskController {
     }
 
     @PatchMapping("/{id}/start")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TaskResponse> startTaskPreparation(@PathVariable Long id) {
+        // Station-specific authorization will be implemented in GREEN phase
         Task task = startTaskPreparationPort.execute(id);
         TaskResponse response = TaskMapper.toResponse(task);
         return ResponseEntity.ok(response);
