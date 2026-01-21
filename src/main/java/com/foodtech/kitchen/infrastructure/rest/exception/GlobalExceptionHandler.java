@@ -4,10 +4,13 @@ import com.foodtech.kitchen.application.exception.OrderNotFoundException;
 import com.foodtech.kitchen.application.exception.ProductAlreadyExistsException;
 import com.foodtech.kitchen.application.exception.ProductNotFoundException;
 import com.foodtech.kitchen.application.exception.StationAuthorizationException;
+import com.foodtech.kitchen.application.exception.TableAlreadyExistsException;
+import com.foodtech.kitchen.application.exception.TableNotFoundException;
 import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -195,11 +198,31 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
+    @ExceptionHandler(TableAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleTableAlreadyExists(TableAlreadyExistsException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Table number already exists",
+            ex.getMessage(),
+            HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    @ExceptionHandler(TableNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleTableNotFound(TableNotFoundException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Table not found",
+            ex.getMessage(),
+            HttpStatus.NOT_FOUND.value()
+        );
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleValidationException(IllegalArgumentException ex) {
         ErrorResponse error = new ErrorResponse(
-            ex.getMessage(),
             "Validation failed",
+            ex.getMessage(),
             HttpStatus.BAD_REQUEST.value()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
@@ -225,6 +248,55 @@ public class GlobalExceptionHandler {
             HttpStatus.BAD_REQUEST.value()
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handles Spring Security AccessDeniedException thrown when a user lacks required permissions.
+     * 
+     * <p>This exception is thrown by Spring Security's @PreAuthorize when a user attempts to access
+     * an endpoint without the required authority/permission. Common scenarios include:</p>
+     * <ul>
+     *   <li>User without {@code admin:all} permission tries to create a table → 403 Forbidden</li>
+     *   <li>User without {@code admin:all} permission tries to create/update/delete a product → 403 Forbidden</li>
+     *   <li>JWT token has incorrect permissions for the requested operation → 403 Forbidden</li>
+     * </ul>
+     * 
+     * <p><strong>HTTP Response Example:</strong></p>
+     * <pre>
+     * Status: 403 Forbidden
+     * Body: {
+     *   "error": "Forbidden",
+     *   "message": "Access Denied: User does not have the required authority to access this resource",
+     *   "status": 403
+     * }
+     * </pre>
+     * 
+     * <p><strong>Security Context:</strong></p>
+     * <p>This handler ensures that unauthorized access attempts return proper 403 Forbidden responses
+     * rather than generic 500 Internal Server Errors. This provides clear feedback to API clients
+     * and helps distinguish between permission issues (403) and server errors (500).</p>
+     * 
+     * <p><strong>Resolution:</strong></p>
+     * <ul>
+     *   <li>Verify the JWT token contains the required permission (e.g., {@code admin:all})</li>
+     *   <li>Check Auth0 user roles and permissions configuration</li>
+     *   <li>Ensure the token hasn't expired (check {@code exp} claim)</li>
+     *   <li>Contact administrator to grant necessary permissions</li>
+     * </ul>
+     * 
+     * @param ex the AccessDeniedException thrown by Spring Security
+     * @return ResponseEntity with 403 Forbidden status and error details
+     * @see org.springframework.security.access.prepost.PreAuthorize
+     * @see com.foodtech.kitchen.infrastructure.security.Permissions
+     */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Forbidden",
+            "Access Denied: User does not have the required authority to access this resource",
+            HttpStatus.FORBIDDEN.value()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(Exception.class)
