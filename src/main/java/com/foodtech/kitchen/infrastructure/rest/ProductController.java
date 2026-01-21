@@ -6,8 +6,10 @@ import com.foodtech.kitchen.domain.model.Product;
 import com.foodtech.kitchen.domain.model.ProductType;
 import com.foodtech.kitchen.infrastructure.rest.dto.*;
 import com.foodtech.kitchen.infrastructure.rest.mapper.ProductDtoMapper;
+import com.foodtech.kitchen.infrastructure.security.Permissions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,22 @@ import java.util.stream.Collectors;
  *   <li>Delegate business logic to application use cases</li>
  *   <li>Convert domain objects to HTTP responses (DTOs)</li>
  *   <li>Return appropriate HTTP status codes</li>
+ *   <li>Enforce authorization policies (admin-only for write operations)</li>
+ * </ul>
+ * 
+ * <p><strong>Authorization:</strong></p>
+ * <ul>
+ *   <li><strong>Read Operations (GET):</strong> All authenticated users (admin, waiters, kitchen staff)</li>
+ *   <li><strong>Write Operations (POST/PUT/PATCH/DELETE):</strong> Admin only (requires {@code admin:all} permission)</li>
+ * </ul>
+ * 
+ * <p><strong>Security Notes:</strong></p>
+ * <ul>
+ *   <li>All endpoints require JWT authentication via Auth0</li>
+ *   <li>Product catalog management is restricted to administrators</li>
+ *   <li>Kitchen staff and waiters can view products but cannot modify them</li>
+ *   <li>Unauthorized access attempts return 403 Forbidden</li>
+ *   <li>Unauthenticated requests return 401 Unauthorized</li>
  * </ul>
  * 
  * <p><strong>RESTful Endpoints:</strong></p>
@@ -37,43 +55,50 @@ import java.util.stream.Collectors;
  *     <th>Method</th>
  *     <th>Path</th>
  *     <th>Description</th>
+ *     <th>Authorization</th>
  *     <th>Status Codes</th>
  *   </tr>
  *   <tr>
  *     <td>POST</td>
  *     <td>/api/products</td>
  *     <td>Create new product</td>
- *     <td>201 Created, 400 Bad Request, 409 Conflict</td>
+ *     <td>Admin only</td>
+ *     <td>201 Created, 400 Bad Request, 403 Forbidden, 409 Conflict</td>
  *   </tr>
  *   <tr>
  *     <td>GET</td>
  *     <td>/api/products/{id}</td>
  *     <td>Get product by ID</td>
- *     <td>200 OK, 404 Not Found</td>
+ *     <td>Authenticated</td>
+ *     <td>200 OK, 401 Unauthorized, 404 Not Found</td>
  *   </tr>
  *   <tr>
  *     <td>GET</td>
  *     <td>/api/products</td>
  *     <td>Get all products (with filters)</td>
- *     <td>200 OK</td>
+ *     <td>Authenticated</td>
+ *     <td>200 OK, 401 Unauthorized</td>
  *   </tr>
  *   <tr>
  *     <td>PUT</td>
  *     <td>/api/products/{id}</td>
  *     <td>Update product details</td>
- *     <td>200 OK, 400 Bad Request, 404 Not Found</td>
+ *     <td>Admin only</td>
+ *     <td>200 OK, 400 Bad Request, 403 Forbidden, 404 Not Found</td>
  *   </tr>
  *   <tr>
  *     <td>PATCH</td>
  *     <td>/api/products/{id}/availability</td>
  *     <td>Update availability status</td>
- *     <td>200 OK, 404 Not Found</td>
+ *     <td>Admin only</td>
+ *     <td>200 OK, 403 Forbidden, 404 Not Found</td>
  *   </tr>
  *   <tr>
  *     <td>DELETE</td>
  *     <td>/api/products/{id}</td>
  *     <td>Delete product (idempotent)</td>
- *     <td>204 No Content</td>
+ *     <td>Admin only</td>
+ *     <td>204 No Content, 403 Forbidden</td>
  *   </tr>
  * </table>
  * 
@@ -91,6 +116,7 @@ import java.util.stream.Collectors;
  *   <li>ProductNotFoundException → 404 Not Found</li>
  *   <li>ProductAlreadyExistsException → 409 Conflict</li>
  *   <li>IllegalArgumentException → 400 Bad Request</li>
+ *   <li>AccessDeniedException (Spring Security) → 403 Forbidden</li>
  * </ul>
  * 
  * <p><strong>HU Relacionada:</strong> HU-006 Gestión del Catálogo de Productos</p>
@@ -103,6 +129,7 @@ import java.util.stream.Collectors;
  * @see DeleteProductUseCase
  * @see ProductDtoMapper
  * @see GlobalExceptionHandler
+ * @see Permissions
  */
 @RestController
 @RequestMapping("/api/products")
@@ -169,6 +196,7 @@ public class ProductController {
      * <ul>
      *   <li>201 Created - Product successfully created</li>
      *   <li>400 Bad Request - Invalid input (null/empty name, invalid type, negative price, etc.)</li>
+     *   <li>403 Forbidden - User does not have admin:all permission</li>
      *   <li>409 Conflict - Product with same name already exists</li>
      * </ul>
      * 
@@ -181,14 +209,18 @@ public class ProductController {
      *   <li>Preparation time must be positive (> 0 seconds)</li>
      * </ul>
      * 
+     * <p><strong>Authorization:</strong> Admin only (requires {@code admin:all} permission)</p>
+     * 
      * @param request the product creation request containing name, description, type, price, and preparation time
      * @return ResponseEntity with 201 status and created product details in response body
      * @throws ProductAlreadyExistsException if a product with the same name already exists (handled by GlobalExceptionHandler → 409)
      * @throws IllegalArgumentException if validation fails (handled by GlobalExceptionHandler → 400)
+     * @throws org.springframework.security.access.AccessDeniedException if user lacks admin:all permission (handled by Spring Security → 403)
      * @see CreateProductUseCase
      * @see ProductDtoMapper#toDomain(CreateProductRequest)
      */
     @PostMapping
+    @PreAuthorize("hasAuthority('" + Permissions.ADMIN_ALL + "')")
     public ResponseEntity<ProductResponse> createProduct(@RequestBody CreateProductRequest request) {
         Product product = ProductDtoMapper.toDomain(request);
         Product createdProduct = createProductUseCase.execute(product);
@@ -227,8 +259,11 @@ public class ProductController {
      * <p><strong>HTTP Status Codes:</strong></p>
      * <ul>
      *   <li>200 OK - Product found and returned</li>
+     *   <li>401 Unauthorized - User not authenticated</li>
      *   <li>404 Not Found - No product exists with the given ID</li>
      * </ul>
+     * 
+     * <p><strong>Authorization:</strong> All authenticated users (admin, waiters, kitchen staff)</p>
      * 
      * @param id the unique identifier of the product to retrieve
      * @return ResponseEntity with 200 status and product details in response body
@@ -237,6 +272,7 @@ public class ProductController {
      * @see ProductDtoMapper#toResponse(Product)
      */
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProductResponse> getProductById(@PathVariable Long id) {
         Product product = getProductByIdUseCase.execute(id);
         ProductResponse response = ProductDtoMapper.toResponse(product);
@@ -292,9 +328,12 @@ public class ProductController {
      * <ul>
      *   <li>200 OK - Products retrieved successfully (empty list if no matches)</li>
      *   <li>400 Bad Request - Invalid type value (if not DRINK, HOT_DISH, or COLD_DISH)</li>
+     *   <li>401 Unauthorized - User not authenticated</li>
      * </ul>
      * 
      * <p><strong>Note:</strong> Returns empty list if no products match the filters.</p>
+     * 
+     * <p><strong>Authorization:</strong> All authenticated users (admin, waiters, kitchen staff)</p>
      * 
      * @param available optional filter for product availability status (true/false/null for all)
      * @param type optional filter for product type (DRINK/HOT_DISH/COLD_DISH, null for all)
@@ -304,6 +343,7 @@ public class ProductController {
      * @see ProductType
      */
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ProductResponse>> getProducts(
             @RequestParam(required = false) Boolean available,
             @RequestParam(required = false) String type) {
@@ -360,6 +400,7 @@ public class ProductController {
      * <ul>
      *   <li>200 OK - Product successfully updated</li>
      *   <li>400 Bad Request - Invalid input (negative price, negative preparation time)</li>
+     *   <li>403 Forbidden - User does not have admin:all permission</li>
      *   <li>404 Not Found - No product exists with the given ID</li>
      * </ul>
      * 
@@ -380,15 +421,19 @@ public class ProductController {
      *   <li>createdAt - System-managed timestamp</li>
      * </ul>
      * 
+     * <p><strong>Authorization:</strong> Admin only (requires {@code admin:all} permission)</p>
+     * 
      * @param id the unique identifier of the product to update
      * @param request the update request containing optional new values for description, price, and/or preparation time
      * @return ResponseEntity with 200 status and updated product details in response body
      * @throws ProductNotFoundException if no product exists with the given ID (handled by GlobalExceptionHandler → 404)
      * @throws IllegalArgumentException if validation fails (negative values) (handled by GlobalExceptionHandler → 400)
+     * @throws org.springframework.security.access.AccessDeniedException if user lacks admin:all permission (handled by Spring Security → 403)
      * @see UpdateProductUseCase
      * @see Price
      */
     @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.ADMIN_ALL + "')")
     public ResponseEntity<ProductResponse> updateProduct(
             @PathVariable Long id,
             @RequestBody UpdateProductRequest request) {
@@ -445,6 +490,7 @@ public class ProductController {
      * <p><strong>HTTP Status Codes:</strong></p>
      * <ul>
      *   <li>200 OK - Availability status successfully updated</li>
+     *   <li>403 Forbidden - User does not have admin:all permission</li>
      *   <li>404 Not Found - No product exists with the given ID</li>
      * </ul>
      * 
@@ -458,13 +504,17 @@ public class ProductController {
      * 
      * <p><strong>Note:</strong> updatedAt timestamp is automatically refreshed when availability changes.</p>
      * 
+     * <p><strong>Authorization:</strong> Admin only (requires {@code admin:all} permission)</p>
+     * 
      * @param id the unique identifier of the product to update
      * @param request the availability update request containing the new availability status (true/false)
      * @return ResponseEntity with 200 status and updated product details in response body
      * @throws ProductNotFoundException if no product exists with the given ID (handled by GlobalExceptionHandler → 404)
+     * @throws org.springframework.security.access.AccessDeniedException if user lacks admin:all permission (handled by Spring Security → 403)
      * @see UpdateProductAvailabilityUseCase
      */
     @PatchMapping("/{id}/availability")
+    @PreAuthorize("hasAuthority('" + Permissions.ADMIN_ALL + "')")
     public ResponseEntity<ProductResponse> updateProductAvailability(
             @PathVariable Long id,
             @RequestBody UpdateProductAvailabilityRequest request) {
@@ -491,6 +541,7 @@ public class ProductController {
      * <p><strong>HTTP Status Codes:</strong></p>
      * <ul>
      *   <li>204 No Content - Product successfully deleted (or already didn't exist)</li>
+     *   <li>403 Forbidden - User does not have admin:all permission</li>
      * </ul>
      * 
      * <p><strong>Idempotency:</strong></p>
@@ -520,12 +571,16 @@ public class ProductController {
      *   <li>Remove duplicate entries</li>
      * </ul>
      * 
+     * <p><strong>Authorization:</strong> Admin only (requires {@code admin:all} permission)</p>
+     * 
      * @param id the unique identifier of the product to delete
      * @return ResponseEntity with 204 No Content status and empty body
+     * @throws org.springframework.security.access.AccessDeniedException if user lacks admin:all permission (handled by Spring Security → 403)
      * @see DeleteProductUseCase
      * @see <a href="https://www.rfc-editor.org/rfc/rfc7231#section-4.3.5">RFC 7231 - DELETE Method</a>
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('" + Permissions.ADMIN_ALL + "')")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         try {
             deleteProductUseCase.execute(id);
