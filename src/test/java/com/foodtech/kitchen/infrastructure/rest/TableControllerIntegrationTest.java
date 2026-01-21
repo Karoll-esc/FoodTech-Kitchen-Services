@@ -51,7 +51,7 @@ class TableControllerIntegrationTest {
     private GetTableByIdUseCase getTableByIdUseCase;
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Escenario 1: Debe crear mesa exitosamente con rol ADMIN")
     void shouldCreateTableSuccessfullyWithAdminRole() throws Exception {
         // Given
@@ -77,7 +77,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Escenario 2: Debe retornar 409 Conflict al crear mesa duplicada")
     void shouldReturn409ConflictWhenCreatingDuplicateTable() throws Exception {
         // Given
@@ -97,7 +97,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Escenario 3: Debe retornar 400 Bad Request con capacidad inválida (0)")
     void shouldReturn400BadRequestWithInvalidCapacityZero() throws Exception {
         // Given
@@ -117,7 +117,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Escenario 3b: Debe retornar 400 Bad Request con capacidad inválida (negativa)")
     void shouldReturn400BadRequestWithNegativeCapacity() throws Exception {
         // Given
@@ -135,7 +135,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Escenario 4: Debe listar todas las mesas con rol ADMIN")
     void shouldGetAllTablesWithAdminRole() throws Exception {
         // Given
@@ -165,7 +165,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Debe retornar lista vacía cuando no hay mesas")
     void shouldReturnEmptyListWhenNoTables() throws Exception {
         // Given
@@ -180,7 +180,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Debe obtener mesa por ID con rol ADMIN")
     void shouldGetTableByIdWithAdminRole() throws Exception {
         // Given
@@ -201,7 +201,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Debe retornar 404 Not Found cuando mesa no existe por ID")
     void shouldReturn404NotFoundWhenTableNotFoundById() throws Exception {
         // Given
@@ -217,7 +217,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Debe validar tableNumber vacío al crear mesa")
     void shouldValidateEmptyTableNumberWhenCreatingTable() throws Exception {
         // Given
@@ -236,7 +236,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Debe crear mesa con capacidades variadas")
     void shouldCreateTableWithVariousCapacities() throws Exception {
         // Capacidad 2
@@ -266,7 +266,7 @@ class TableControllerIntegrationTest {
     }
 
     @Test
-    @WithMockUser(authorities = "ADMIN")
+    @WithMockUser(authorities = "admin:all")
     @DisplayName("Debe crear mesa con números alfanuméricos")
     void shouldCreateTableWithAlphanumericNumbers() throws Exception {
         // Given
