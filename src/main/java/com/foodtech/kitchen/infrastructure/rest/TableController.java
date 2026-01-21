@@ -7,6 +7,7 @@ import com.foodtech.kitchen.domain.model.Table;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateTableRequest;
 import com.foodtech.kitchen.infrastructure.rest.dto.TableResponse;
 import com.foodtech.kitchen.infrastructure.rest.mapper.TableMapper;
+import com.foodtech.kitchen.infrastructure.security.Permissions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,23 +23,23 @@ import java.util.stream.Collectors;
  *   <li>Layer: Infrastructure (REST)</li>
  *   <li>Pattern: Controller (coordinates use cases)</li>
  *   <li>Base Path: /api/tables</li>
- *   <li>Authorization: ADMIN only (enforced via @PreAuthorize)</li>
+ *   <li>Authorization: Mixed (POST requires admin:all, GET requires authentication only)</li>
  * </ul>
  * 
  * <p><strong>Endpoints:</strong></p>
  * <ul>
- *   <li>POST /api/tables - Create new table</li>
- *   <li>GET /api/tables - List all tables</li>
- *   <li>GET /api/tables/{id} - Get table by ID</li>
+ *   <li>POST /api/tables - Create new table (ADMIN only)</li>
+ *   <li>GET /api/tables - List all tables (Any authenticated user)</li>
+ *   <li>GET /api/tables/{id} - Get table by ID (Any authenticated user)</li>
  * </ul>
  * 
  * <p><strong>Security:</strong></p>
  * <ul>
  *   <li>All endpoints require authentication (JWT token)</li>
- *   <li>All endpoints require ADMIN authority</li>
- *   <li>Authorization enforced by @PreAuthorize annotation</li>
+ *   <li>POST endpoints require admin:all permission</li>
+ *   <li>GET endpoints accessible to any authenticated user</li>
  *   <li>401 Unauthorized if no valid JWT token</li>
- *   <li>403 Forbidden if user lacks ADMIN authority</li>
+ *   <li>403 Forbidden if user lacks required permission (POST only)</li>
  * </ul>
  * 
  * <p><strong>Responsibilities:</strong></p>
@@ -142,7 +143,7 @@ public class TableController {
      * @see TableResponse
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('" + Permissions.ADMIN_ALL + "')")
     public ResponseEntity<TableResponse> createTable(@RequestBody CreateTableRequest request) {
         Table table = createTableUseCase.execute(request.getTableNumber(), request.getCapacity());
         TableResponse response = TableMapper.toResponse(table);
@@ -154,21 +155,23 @@ public class TableController {
      * 
      * <p><strong>HTTP Method:</strong> GET</p>
      * <p><strong>Path:</strong> /api/tables</p>
-     * <p><strong>Authorization:</strong> Requires ADMIN authority</p>
+     * <p><strong>Authorization:</strong> Requires authentication (any valid JWT token)</p>
      * 
      * <p><strong>Status Codes:</strong></p>
      * <ul>
      *   <li>200 OK: Returns list of tables (empty list if none exist)</li>
      *   <li>401 Unauthorized: No valid JWT token</li>
-     *   <li>403 Forbidden: User lacks ADMIN authority</li>
      * </ul>
+     * 
+     * <p><strong>Access Control:</strong></p>
+     * <p>This endpoint is accessible to all authenticated users (kitchen staff, waiters, admins)
+     * as they need to view available tables for order management and table assignment.</p>
      * 
      * @return ResponseEntity with 200 OK and list of TableResponse objects
      * @see GetAllTablesUseCase
      * @see TableResponse
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<List<TableResponse>> getAllTables() {
         List<Table> tables = getAllTablesUseCase.execute();
         List<TableResponse> responses = tables.stream()
@@ -182,15 +185,18 @@ public class TableController {
      * 
      * <p><strong>HTTP Method:</strong> GET</p>
      * <p><strong>Path:</strong> /api/tables/{id}</p>
-     * <p><strong>Authorization:</strong> Requires ADMIN authority</p>
+     * <p><strong>Authorization:</strong> Requires authentication (any valid JWT token)</p>
      * 
      * <p><strong>Status Codes:</strong></p>
      * <ul>
      *   <li>200 OK: Table found and returned</li>
      *   <li>401 Unauthorized: No valid JWT token</li>
-     *   <li>403 Forbidden: User lacks ADMIN authority</li>
      *   <li>404 Not Found: Table with specified ID does not exist</li>
      * </ul>
+     * 
+     * <p><strong>Access Control:</strong></p>
+     * <p>This endpoint is accessible to all authenticated users (kitchen staff, waiters, admins)
+     * as they need to view table details for order processing and service.</p>
      * 
      * @param id the database ID of the table to retrieve
      * @return ResponseEntity with 200 OK and the TableResponse
@@ -198,7 +204,6 @@ public class TableController {
      * @see TableResponse
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<TableResponse> getTableById(@PathVariable Long id) {
         Table table = getTableByIdUseCase.execute(id);
         TableResponse response = TableMapper.toResponse(table);
