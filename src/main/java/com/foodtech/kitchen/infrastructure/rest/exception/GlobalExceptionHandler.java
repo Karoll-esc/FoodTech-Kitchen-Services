@@ -35,6 +35,39 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    /**
+     * Handles ProductNotFoundException thrown when attempting to retrieve or modify a non-existent product.
+     * 
+     * <p>This exception is thrown by product use cases when an operation references a product ID
+     * that does not exist in the catalog database. Common scenarios include:</p>
+     * <ul>
+     *   <li>GET /api/products/{id} - Retrieving a product that doesn't exist</li>
+     *   <li>PUT /api/products/{id} - Updating a product that doesn't exist</li>
+     *   <li>PATCH /api/products/{id}/availability - Changing availability of non-existent product</li>
+     *   <li>DELETE /api/products/{id} - Deleting a product that doesn't exist (caught by controller)</li>
+     * </ul>
+     * 
+     * <p><strong>HTTP Response:</strong></p>
+     * <pre>
+     * Status: 404 Not Found
+     * Body: {
+     *   "error": "Product not found",
+     *   "message": "Product not found with id: 123",
+     *   "status": 404
+     * }
+     * </pre>
+     * 
+     * <p><strong>Note:</strong> DELETE endpoints may catch this exception internally to ensure
+     * idempotent behavior (returning 204 regardless of existence).</p>
+     * 
+     * @param ex the ProductNotFoundException containing the product ID that was not found
+     * @return ResponseEntity with 404 status and error details in response body
+     * @see ProductNotFoundException
+     * @see com.foodtech.kitchen.application.usecases.GetProductByIdUseCase
+     * @see com.foodtech.kitchen.application.usecases.UpdateProductUseCase
+     * @see com.foodtech.kitchen.application.usecases.UpdateProductAvailabilityUseCase
+     * @see com.foodtech.kitchen.application.usecases.DeleteProductUseCase
+     */
     @ExceptionHandler(ProductNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex) {
         ErrorResponse error = new ErrorResponse(
@@ -45,6 +78,50 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
 
+    /**
+     * Handles ProductAlreadyExistsException thrown when attempting to create a product with a duplicate name.
+     * 
+     * <p>This exception is thrown by CreateProductUseCase when a product creation request
+     * contains a name that already exists in the catalog. Product names must be unique to
+     * prevent confusion and ensure proper catalog management.</p>
+     * 
+     * <p><strong>Scenario:</strong></p>
+     * <ul>
+     *   <li>POST /api/products - Creating a product with a name that already exists</li>
+     * </ul>
+     * 
+     * <p><strong>Business Rule:</strong></p>
+     * <p>Product names must be unique (case-sensitive). This constraint ensures that:</p>
+     * <ul>
+     *   <li>Each product has a distinct identity in the catalog</li>
+     *   <li>Kitchen staff can unambiguously identify products</li>
+     *   <li>Reporting and analytics are accurate</li>
+     *   <li>UI/UX displays remain clear without duplicates</li>
+     * </ul>
+     * 
+     * <p><strong>HTTP Response:</strong></p>
+     * <pre>
+     * Status: 409 Conflict
+     * Body: {
+     *   "error": "Product already exists",
+     *   "message": "Product with name 'Coca Cola' already exists",
+     *   "status": 409
+     * }
+     * </pre>
+     * 
+     * <p><strong>Resolution:</strong></p>
+     * <ul>
+     *   <li>Client should use a different product name</li>
+     *   <li>Or retrieve existing product with GET /api/products and update it with PUT</li>
+     *   <li>Or check if existing product should be updated instead of creating a new one</li>
+     * </ul>
+     * 
+     * @param ex the ProductAlreadyExistsException containing the duplicate product name
+     * @return ResponseEntity with 409 Conflict status and error details in response body
+     * @see ProductAlreadyExistsException
+     * @see com.foodtech.kitchen.application.usecases.CreateProductUseCase
+     * @see com.foodtech.kitchen.domain.services.ProductValidator
+     */
     @ExceptionHandler(ProductAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleProductAlreadyExistsException(ProductAlreadyExistsException ex) {
         ErrorResponse error = new ErrorResponse(
