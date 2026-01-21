@@ -1,5 +1,7 @@
 package com.foodtech.kitchen.infrastructure.config;
 
+import com.foodtech.kitchen.application.services.StationAuthorizationService;
+import com.foodtech.kitchen.domain.model.Station;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -11,6 +13,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Set;
+
 /**
  * Test security configuration that disables authentication for integration tests.
  * 
@@ -21,6 +25,7 @@ import org.springframework.security.web.SecurityFilterChain;
  * - Excludes OAuth2ResourceServerAutoConfiguration to prevent Auth0 JWT validation
  * - Permits all requests without authentication
  * - Disables CSRF for stateless testing
+ * - Provides a test StationAuthorizationService that always grants access
  * 
  * Usage:
  * Add @Import(TestSecurityConfig.class) to test classes that need this configuration.
@@ -52,5 +57,22 @@ public class TestSecurityConfig {
             );
         
         return http.build();
+    }
+
+    /**
+     * Test implementation of StationAuthorizationService that always grants access.
+     * This allows integration tests to focus on business logic rather than authorization.
+     * Marked as @Primary to override the production StationAuthorizationService.
+     */
+    @Bean
+    @Primary
+    public StationAuthorizationService testStationAuthorizationService() {
+        return new StationAuthorizationService() {
+            @Override
+            public void validateUserCanUpdateTaskAtStation(Set<String> permissions, Station station) {
+                // In tests, always grant access - no exception thrown
+                // This allows integration tests to focus on business logic
+            }
+        };
     }
 }

@@ -7,6 +7,7 @@ import com.foodtech.kitchen.application.ports.in.*;
 import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.OrderRepository;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
+import com.foodtech.kitchen.application.services.StationAuthorizationService;
 import com.foodtech.kitchen.application.usecases.*;
 import com.foodtech.kitchen.domain.services.*;
 import org.springframework.context.annotation.Bean;
@@ -82,5 +83,10 @@ public class ApplicationConfig {
             OrderStatusCalculator orderStatusCalculator
     ) {
         return new GetOrderStatusUseCase(taskRepository, orderStatusCalculator);
+    }
+
+    @Bean
+    public StationAuthorizationService stationAuthorizationService() {
+        return new StationAuthorizationService();
     }
 }
