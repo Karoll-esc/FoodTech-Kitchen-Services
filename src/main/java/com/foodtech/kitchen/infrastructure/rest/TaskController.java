@@ -1,5 +1,6 @@
 package com.foodtech.kitchen.infrastructure.rest;
 
+import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.application.ports.in.GetTasksByStationPort;
 import com.foodtech.kitchen.application.ports.in.StartTaskPreparationPort;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
@@ -60,7 +61,7 @@ public class TaskController {
     public ResponseEntity<TaskResponse> startTaskPreparation(@PathVariable Long id) {
         // Get task to determine its station
         Task task = taskRepository.findById(id)
-            .orElseThrow(() -> new com.foodtech.kitchen.application.exception.TaskNotFoundException(id));
+            .orElseThrow(() -> new TaskNotFoundException(id));
         
         // Validate user has permission for this station
         Set<String> userPermissions = securityContextHelper.getCurrentUserPermissions();

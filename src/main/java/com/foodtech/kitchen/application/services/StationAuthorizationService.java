@@ -17,18 +17,40 @@ import java.util.Set;
  * - Hot kitchen staff (update:tasks:hot-kitchen) can ONLY update HOT_KITCHEN station tasks
  * - Cold kitchen staff (update:tasks:cold-kitchen) can ONLY update COLD_KITCHEN station tasks
  * - Admin (admin:all) can update ANY station tasks
+ * 
+ * Architecture Notes:
+ * - Application layer service (no Spring annotations)
+ * - Pure business logic for authorization validation
+ * - Throws StationAuthorizationException when access is denied (results in 403 Forbidden)
+ * - Used by infrastructure layer controllers to enforce authorization
+ * 
+ * Usage Example:
+ * {@code
+ * Set<String> userPermissions = securityHelper.getCurrentUserPermissions();
+ * authService.validateUserCanUpdateTaskAtStation(userPermissions, Station.BAR);
+ * // If execution reaches here, user is authorized
+ * }
  */
 public class StationAuthorizationService {
 
     /**
      * Validates that the user has permission to update tasks at the specified station.
      * 
-     * @param permissions The set of permissions from the user's JWT token
-     * @param station The station where the task is located
+     * @param permissions The set of permissions from the user's JWT token (cannot be null)
+     * @param station The station where the task is located (cannot be null)
      * @throws StationAuthorizationException if the user is not authorized for this station
+     * @throws IllegalArgumentException if permissions or station is null
      */
     public void validateUserCanUpdateTaskAtStation(Set<String> permissions, Station station) 
             throws StationAuthorizationException {
+        
+        if (permissions == null) {
+            throw new IllegalArgumentException("Permissions cannot be null");
+        }
+        
+        if (station == null) {
+            throw new IllegalArgumentException("Station cannot be null");
+        }
         
         // Admin has access to all stations
         if (permissions.contains(Permissions.ADMIN_ALL)) {
@@ -39,7 +61,7 @@ public class StationAuthorizationService {
         String requiredPermission = getRequiredPermissionForStation(station);
         
         if (!permissions.contains(requiredPermission)) {
-            throw new StationAuthorizationException(station);
+            throw new StationAuthorizationException(station, permissions);
         }
     }
 

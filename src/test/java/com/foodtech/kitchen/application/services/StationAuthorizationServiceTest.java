@@ -12,14 +12,20 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * TDD RED Phase: Tests for station-based authorization logic.
+ * Unit tests for station-based authorization logic.
  * 
- * Business Rules:
+ * Validates that the StationAuthorizationService correctly enforces business rules:
  * - Bar staff (update:tasks:bar) can ONLY update BAR station tasks
  * - Hot kitchen staff (update:tasks:hot-kitchen) can ONLY update HOT_KITCHEN station tasks
  * - Cold kitchen staff (update:tasks:cold-kitchen) can ONLY update COLD_KITCHEN station tasks
  * - Admin (admin:all) can update ANY station tasks
  * - Users without appropriate permissions should be denied access
+ * 
+ * Test Strategy:
+ * - Tests focus on authorization logic in isolation (unit tests)
+ * - Each test validates a specific business rule
+ * - Uses assertDoesNotThrow for authorized scenarios
+ * - Uses assertThrows for unauthorized scenarios
  */
 @DisplayName("StationAuthorizationService - Station-based authorization")
 class StationAuthorizationServiceTest {
