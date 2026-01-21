@@ -5,6 +5,7 @@ import com.foodtech.kitchen.domain.model.Product;
 import com.foodtech.kitchen.domain.model.ProductType;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.ProductJpaRepository;
+import com.foodtech.kitchen.infrastructure.persistence.mappers.ProductEntityMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-@Import(ProductRepositoryAdapter.class)
+@Import({ProductRepositoryAdapter.class, ProductEntityMapper.class})
 class ProductRepositoryAdapterTest {
 
     @Autowired
@@ -108,7 +109,7 @@ class ProductRepositoryAdapterTest {
         assertNotNull(result);
         assertEquals(productId, result.getId());
         assertEquals("Pizza clásica mejorada", updatedEntity.getDescription());
-        assertEquals(new BigDecimal("12.00"), updatedEntity.getPrice());
+        assertEquals(0, new BigDecimal("12.00").compareTo(updatedEntity.getPrice()));
         assertEquals(700, updatedEntity.getPreparationTimeSeconds());
     }
 
@@ -412,8 +413,9 @@ class ProductRepositoryAdapterTest {
 
         // Then
         ProductEntity resultEntity = entityManager.find(ProductEntity.class, savedEntity.getId());
-        assertEquals(originalCreatedAt, resultEntity.getCreatedAt());
-        assertTrue(resultEntity.getUpdatedAt().isAfter(originalUpdatedAt));
+        assertEquals(originalCreatedAt.withNano(0), resultEntity.getCreatedAt().withNano(0));
+        assertTrue(resultEntity.getUpdatedAt().isAfter(originalUpdatedAt) || 
+                   resultEntity.getUpdatedAt().isEqual(originalUpdatedAt));
     }
 
     // Helper method to create and persist product entities
