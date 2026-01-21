@@ -4,6 +4,53 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.foodtech.kitchen.domain.model.TableStatus;
 import java.time.LocalDateTime;
 
+/**
+ * DTO for table responses in REST API.
+ * 
+ * <p><strong>Architecture:</strong></p>
+ * <ul>
+ *   <li>Layer: Infrastructure (REST)</li>
+ *   <li>Pattern: DTO (Data Transfer Object)</li>
+ *   <li>Purpose: HTTP response body for table-related endpoints</li>
+ * </ul>
+ * 
+ * <p><strong>Fields:</strong></p>
+ * <ul>
+ *   <li>id: Database primary key</li>
+ *   <li>tableNumber: Unique identifier (e.g., "A1", "B2", "VIP-01")</li>
+ *   <li>capacity: Number of diners the table can accommodate</li>
+ *   <li>status: Operational state (AVAILABLE, OCCUPIED, SERVED, CLEANING)</li>
+ *   <li>currentOrderId: FK to orders table (nullable, only set when OCCUPIED/SERVED)</li>
+ *   <li>createdAt: Timestamp when table was registered</li>
+ *   <li>updatedAt: Timestamp of last modification</li>
+ * </ul>
+ * 
+ * <p><strong>Usage:</strong></p>
+ * <ul>
+ *   <li>POST /api/tables response (201 Created)</li>
+ *   <li>GET /api/tables response (200 OK, array of TableResponse)</li>
+ *   <li>GET /api/tables/{id} response (200 OK)</li>
+ * </ul>
+ * 
+ * <p><strong>Example JSON:</strong></p>
+ * <pre>
+ * {
+ *   "id": 1,
+ *   "tableNumber": "A1",
+ *   "capacity": 4,
+ *   "status": "AVAILABLE",
+ *   "currentOrderId": null,
+ *   "createdAt": "2026-01-21T16:00:00",
+ *   "updatedAt": "2026-01-21T16:00:00"
+ * }
+ * </pre>
+ * 
+ * @see com.foodtech.kitchen.infrastructure.rest.TableController
+ * @see com.foodtech.kitchen.infrastructure.rest.mapper.TableMapper
+ * @author FoodTech Kitchen Team
+ * @version 1.0
+ * @since 2026-01-21
+ */
 public class TableResponse {
     
     @JsonProperty("id")
@@ -27,8 +74,22 @@ public class TableResponse {
     @JsonProperty("updatedAt")
     private LocalDateTime updatedAt;
     
+    /**
+     * Default no-args constructor for Jackson serialization.
+     */
     public TableResponse() {}
     
+    /**
+     * Constructor with all fields.
+     * 
+     * @param id database primary key
+     * @param tableNumber unique table identifier
+     * @param capacity number of diners
+     * @param status operational state
+     * @param currentOrderId nullable, ID of current order
+     * @param createdAt registration timestamp
+     * @param updatedAt last modification timestamp
+     */
     public TableResponse(Long id, String tableNumber, Integer capacity, TableStatus status,
                         Long currentOrderId, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
