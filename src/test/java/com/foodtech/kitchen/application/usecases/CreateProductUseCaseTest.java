@@ -172,4 +172,28 @@ class CreateProductUseCaseTest {
         verify(productRepository, never()).existsByName(anyString());
         verify(productRepository, never()).save(any());
     }
+
+    @Test
+    @DisplayName("Debe lanzar IllegalArgumentException cuando ProductRepository es null en constructor")
+    void shouldThrowIllegalArgumentExceptionWhenRepositoryIsNull() {
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> new CreateProductUseCase(null, productValidator)
+        );
+
+        assertEquals("ProductRepository cannot be null", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Debe lanzar IllegalArgumentException cuando ProductValidator es null en constructor")
+    void shouldThrowIllegalArgumentExceptionWhenValidatorIsNull() {
+        // When & Then
+        IllegalArgumentException exception = assertThrows(
+            IllegalArgumentException.class,
+            () -> new CreateProductUseCase(productRepository, null)
+        );
+
+        assertEquals("ProductValidator cannot be null", exception.getMessage());
+    }
 }
