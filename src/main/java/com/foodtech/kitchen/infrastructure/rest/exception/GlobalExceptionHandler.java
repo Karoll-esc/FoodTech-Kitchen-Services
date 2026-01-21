@@ -3,6 +3,7 @@ package com.foodtech.kitchen.infrastructure.rest.exception;
 import com.foodtech.kitchen.application.exception.OrderNotFoundException;
 import com.foodtech.kitchen.application.exception.ProductAlreadyExistsException;
 import com.foodtech.kitchen.application.exception.ProductNotFoundException;
+import com.foodtech.kitchen.application.exception.StationAuthorizationException;
 import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -130,6 +131,68 @@ public class GlobalExceptionHandler {
             HttpStatus.CONFLICT.value()
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    /**
+     * Handles StationAuthorizationException thrown when a user attempts to update a task
+     * at a station for which they don't have the required permission.
+     * 
+     * <p>This exception is thrown by StationAuthorizationService when a kitchen staff member
+     * attempts to modify tasks assigned to a station they're not authorized for. The FoodTech
+     * Kitchen system enforces strict station-based access control:</p>
+     * <ul>
+     *   <li><strong>Bar Staff:</strong> Can only update BAR station tasks (requires {@code update:tasks:bar})</li>
+     *   <li><strong>Hot Kitchen Staff:</strong> Can only update HOT_KITCHEN station tasks (requires {@code update:tasks:hot-kitchen})</li>
+     *   <li><strong>Cold Kitchen Staff:</strong> Can only update COLD_KITCHEN station tasks (requires {@code update:tasks:cold-kitchen})</li>
+     *   <li><strong>Admin:</strong> Can update ALL station tasks (has {@code admin:all} permission)</li>
+     * </ul>
+     * 
+     * <p><strong>Common Scenarios:</strong></p>
+     * <ul>
+     *   <li>Bar staff trying to start a HOT_KITCHEN task → 403 Forbidden</li>
+     *   <li>Hot kitchen staff trying to complete a COLD_KITCHEN task → 403 Forbidden</li>
+     *   <li>Cold kitchen staff trying to update a BAR task → 403 Forbidden</li>
+     * </ul>
+     * 
+     * <p><strong>HTTP Response Example:</strong></p>
+     * <pre>
+     * Status: 403 Forbidden
+     * Body: {
+     *   "error": "Forbidden",
+     *   "message": "User is not authorized to update tasks at station: HOT_KITCHEN. 
+     *               User permissions: update:tasks:bar, read:tasks. 
+     *               Required permission: update:tasks:hot-kitchen or admin:all",
+     *   "status": 403
+     * }
+     * </pre>
+     * 
+     * <p><strong>Security Implications:</strong></p>
+     * <p>This authorization mechanism ensures that kitchen staff can only work on tasks
+     * within their designated station, preventing cross-station interference and maintaining
+     * proper workflow separation. Admins bypass all station restrictions for management purposes.</p>
+     * 
+     * <p><strong>Resolution:</strong></p>
+     * <ul>
+     *   <li>User must request access to the required station permission from administrator</li>
+     *   <li>Administrator must update user's role/permissions in Auth0 tenant</li>
+     *   <li>User must obtain a new JWT token with updated permissions</li>
+     *   <li>Alternatively, admin user with {@code admin:all} permission can perform the operation</li>
+     * </ul>
+     * 
+     * @param ex the StationAuthorizationException containing station and user permission details
+     * @return ResponseEntity with 403 Forbidden status and detailed error message
+     * @see StationAuthorizationException
+     * @see com.foodtech.kitchen.application.services.StationAuthorizationService
+     * @see com.foodtech.kitchen.infrastructure.security.Permissions
+     */
+    @ExceptionHandler(StationAuthorizationException.class)
+    public ResponseEntity<ErrorResponse> handleStationAuthorizationException(StationAuthorizationException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Forbidden",
+            ex.getMessage(),
+            HttpStatus.FORBIDDEN.value()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
