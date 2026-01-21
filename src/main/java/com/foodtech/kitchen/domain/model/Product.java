@@ -27,18 +27,18 @@ import java.time.LocalDateTime;
  * <p><strong>Campos Inmutables:</strong></p>
  * <ul>
  *   <li>name - no se puede cambiar después de creación</li>
- *   <li>description - no se puede cambiar (actualizar con nuevo producto)</li>
  *   <li>type - no se puede cambiar después de creación</li>
- *   <li>price - inmutable (Price es Value Object)</li>
- *   <li>preparationTimeSeconds - no se puede cambiar</li>
  *   <li>createdAt - establecido en construcción</li>
  * </ul>
  * 
  * <p><strong>Campos Mutables:</strong></p>
  * <ul>
  *   <li>id - establecido por el repositorio al persistir</li>
+ *   <li>description - puede actualizarse con updateDetails()</li>
+ *   <li>price - puede actualizarse con updateDetails()</li>
+ *   <li>preparationTimeSeconds - puede actualizarse con updateDetails()</li>
  *   <li>available - puede cambiar para habilitar/deshabilitar producto</li>
- *   <li>updatedAt - actualizado con updateTimestamp()</li>
+ *   <li>updatedAt - actualizado automáticamente con updateDetails() y updateTimestamp()</li>
  * </ul>
  * 
  * <p><strong>Ejemplo de uso:</strong></p>
@@ -68,10 +68,10 @@ public class Product {
 
     private Long id;
     private final String name;
-    private final String description;
+    private String description;
     private final ProductType type;
-    private final Price price;
-    private final int preparationTimeSeconds;
+    private Price price;
+    private int preparationTimeSeconds;
     private boolean available;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -129,6 +129,39 @@ public class Product {
     @Deprecated
     public Product(String name, ProductType type) {
         this(name, "", type, new Price(BigDecimal.ZERO), 1);
+    }
+
+    /**
+     * Constructor para reconstruir un producto desde la base de datos.
+     * 
+     * <p>Este constructor incluye el ID y disponibilidad, utilizado por
+     * el repositorio al cargar productos existentes.</p>
+     * 
+     * @param id el ID del producto
+     * @param name el nombre del producto
+     * @param description descripción del producto
+     * @param type tipo de producto
+     * @param price precio del producto
+     * @param preparationTimeSeconds tiempo de preparación en segundos
+     * @param available disponibilidad del producto
+     */
+    public Product(Long id, String name, String description, ProductType type, Price price, int preparationTimeSeconds, boolean available) {
+        validateName(name);
+        validateDescription(description);
+        validateType(type);
+        validatePrice(price);
+        validatePreparationTime(preparationTimeSeconds);
+        
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.type = type;
+        this.price = price;
+        this.preparationTimeSeconds = preparationTimeSeconds;
+        this.available = available;
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     /**
@@ -258,6 +291,17 @@ public class Product {
     }
 
     /**
+     * Obtiene el tiempo de preparación.
+     * 
+     * <p>Alias de getPreparationTimeSeconds() que retorna Integer para compatibilidad.</p>
+     * 
+     * @return el tiempo de preparación en segundos como Integer
+     */
+    public Integer getPreparationTime() {
+        return preparationTimeSeconds;
+    }
+
+    /**
      * Verifica si el producto está disponible.
      * 
      * @return true si está disponible, false si está deshabilitado
@@ -294,6 +338,37 @@ public class Product {
      */
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    /**
+     * Actualiza los campos mutables del producto.
+     * 
+     * <p>Solo actualiza los campos que no sean null. Si un campo es null,
+     * se mantiene el valor actual.</p>
+     * 
+     * <p>Este método actualiza automáticamente el timestamp updatedAt.</p>
+     * 
+     * @param description nueva descripción (null para mantener actual)
+     * @param price nuevo precio (null para mantener actual)
+     * @param preparationTimeSeconds nuevo tiempo de preparación (null para mantener actual)
+     */
+    public void updateDetails(String description, Price price, Integer preparationTimeSeconds) {
+        if (description != null) {
+            validateDescription(description);
+            this.description = description;
+        }
+        
+        if (price != null) {
+            validatePrice(price);
+            this.price = price;
+        }
+        
+        if (preparationTimeSeconds != null) {
+            validatePreparationTime(preparationTimeSeconds);
+            this.preparationTimeSeconds = preparationTimeSeconds;
+        }
+        
+        this.updatedAt = LocalDateTime.now();
     }
 
     /**

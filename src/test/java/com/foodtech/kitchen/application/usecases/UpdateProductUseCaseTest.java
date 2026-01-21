@@ -54,7 +54,7 @@ class UpdateProductUseCaseTest {
 
     @Test
     @DisplayName("Debe actualizar todos los campos mutables correctamente")
-    void shouldUpdateAllMutableFieldsSuccessfully() {
+    void shouldUpdateAllMutableFieldsSuccessfully() throws InterruptedException {
         // Given
         Long productId = 1L;
         Product existingProduct = new Product(
@@ -62,13 +62,18 @@ class UpdateProductUseCaseTest {
             "Coca Cola",
             "Bebida refrescante",
             ProductType.DRINK,
-            new Price(new BigDecimal("5.00"), "USD"),
+            new Price(new BigDecimal("5.00")),
             5,
             true
         );
         
+        LocalDateTime originalUpdatedAt = existingProduct.getUpdatedAt();
+        
+        // Wait to ensure timestamp difference
+        Thread.sleep(10);
+        
         String newDescription = "Bebida gaseosa refrescante";
-        Price newPrice = new Price(new BigDecimal("6.50"), "USD");
+        Price newPrice = new Price(new BigDecimal("6.50"));
         Integer newPreparationTime = 3;
         
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
@@ -90,7 +95,7 @@ class UpdateProductUseCaseTest {
         assertEquals(existingProduct.getCreatedAt(), updatedProduct.getCreatedAt());
         
         // Verify updatedAt was changed
-        assertNotEquals(existingProduct.getUpdatedAt(), updatedProduct.getUpdatedAt());
+        assertTrue(updatedProduct.getUpdatedAt().isAfter(originalUpdatedAt));
         
         verify(productRepository).findById(productId);
         verify(productValidator).validate(any(Product.class));
@@ -102,7 +107,7 @@ class UpdateProductUseCaseTest {
     void shouldUpdateOnlyDescriptionWhenOtherFieldsAreNull() {
         // Given
         Long productId = 1L;
-        Price originalPrice = new Price(new BigDecimal("5.00"), "USD");
+        Price originalPrice = new Price(new BigDecimal("5.00"));
         Product existingProduct = new Product(
             productId,
             "Coca Cola",
@@ -143,12 +148,12 @@ class UpdateProductUseCaseTest {
             "Coca Cola",
             originalDescription,
             ProductType.DRINK,
-            new Price(new BigDecimal("5.00"), "USD"),
+            new Price(new BigDecimal("5.00")),
             5,
             true
         );
         
-        Price newPrice = new Price(new BigDecimal("7.00"), "USD");
+        Price newPrice = new Price(new BigDecimal("7.00"));
         
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -173,7 +178,7 @@ class UpdateProductUseCaseTest {
         // Given
         Long productId = 1L;
         String originalDescription = "Bebida refrescante";
-        Price originalPrice = new Price(new BigDecimal("5.00"), "USD");
+        Price originalPrice = new Price(new BigDecimal("5.00"));
         Product existingProduct = new Product(
             productId,
             "Coca Cola",
@@ -230,25 +235,17 @@ class UpdateProductUseCaseTest {
             "Coca Cola",
             "Bebida refrescante",
             ProductType.DRINK,
-            new Price(new BigDecimal("5.00"), "USD"),
+            new Price(new BigDecimal("5.00")),
             5,
             true
         );
         
-        Price invalidPrice = new Price(new BigDecimal("-10.00"), "USD");
-        
-        when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
-        doThrow(new IllegalArgumentException("Price amount cannot be negative"))
-            .when(productValidator).validate(any(Product.class));
-        
+        // Note: Price value object validates itself, so negative price throws during construction
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-            () -> updateProductUseCase.execute(productId, null, invalidPrice, null));
+            () -> new Price(new BigDecimal("-10.00")));
         
-        assertEquals("Price amount cannot be negative", exception.getMessage());
-        verify(productRepository).findById(productId);
-        verify(productValidator).validate(any(Product.class));
-        verify(productRepository, never()).save(any(Product.class));
+        assertEquals("Price cannot be null or negative", exception.getMessage());
     }
 
     @Test
@@ -261,7 +258,7 @@ class UpdateProductUseCaseTest {
             "Coca Cola",
             "Bebida refrescante",
             ProductType.DRINK,
-            new Price(new BigDecimal("5.00"), "USD"),
+            new Price(new BigDecimal("5.00")),
             5,
             true
         );
@@ -269,16 +266,14 @@ class UpdateProductUseCaseTest {
         Integer invalidPreparationTime = -5;
         
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
-        doThrow(new IllegalArgumentException("Preparation time cannot be negative"))
-            .when(productValidator).validate(any(Product.class));
         
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
             () -> updateProductUseCase.execute(productId, null, null, invalidPreparationTime));
         
-        assertEquals("Preparation time cannot be negative", exception.getMessage());
+        assertEquals("Preparation time must be greater than zero", exception.getMessage());
         verify(productRepository).findById(productId);
-        verify(productValidator).validate(any(Product.class));
+        verify(productValidator, never()).validate(any(Product.class));
         verify(productRepository, never()).save(any(Product.class));
     }
 
@@ -295,7 +290,7 @@ class UpdateProductUseCaseTest {
             "Coca Cola",
             "Bebida refrescante",
             ProductType.DRINK,
-            new Price(new BigDecimal("5.00"), "USD"),
+            new Price(new BigDecimal("5.00")),
             5,
             true
         );
@@ -335,14 +330,14 @@ class UpdateProductUseCaseTest {
             "Coca Cola",
             "Bebida refrescante",
             ProductType.DRINK,
-            new Price(new BigDecimal("5.00"), "USD"),
+            new Price(new BigDecimal("5.00")),
             5,
             true
         );
         
         // Update all mutable fields
         String newDescription = "Nueva descripción";
-        Price newPrice = new Price(new BigDecimal("10.00"), "USD");
+        Price newPrice = new Price(new BigDecimal("10.00"));
         Integer newPreparationTime = 15;
         
         when(productRepository.findById(productId)).thenReturn(Optional.of(existingProduct));
