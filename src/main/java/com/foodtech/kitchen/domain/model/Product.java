@@ -107,8 +107,9 @@ public class Product {
         this.price = price;
         this.preparationTimeSeconds = preparationTimeSeconds;
         this.available = true;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     /**
