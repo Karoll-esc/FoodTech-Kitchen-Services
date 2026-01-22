@@ -153,6 +153,26 @@ public class TableRepositoryAdapter implements TableRepository {
     }
     
     /**
+     * Updates an existing table in the database.
+     * 
+     * <p>Converts domain Table to JPA entity and persists the changes.
+     * The table must have a valid ID (non-null) to be updated.</p>
+     * 
+     * @param table the domain Table with updated data (must have ID)
+     * @return the updated Table
+     * @throws IllegalArgumentException if table ID is null
+     */
+    @Override
+    public Table update(Table table) {
+        if (table.getId() == null) {
+            throw new IllegalArgumentException("Cannot update table without ID");
+        }
+        TableEntity entity = mapper.toEntity(table);
+        TableEntity updatedEntity = jpaRepository.save(entity);
+        return mapper.toDomain(updatedEntity);
+    }
+    
+    /**
      * Deletes a table by its database ID.
      * 
      * <p>Note: This is a destructive operation with no undo.</p>
