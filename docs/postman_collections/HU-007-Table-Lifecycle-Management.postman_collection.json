@@ -1,0 +1,975 @@
+{
+	"info": {
+		"_postman_id": "hu-007-table-lifecycle",
+		"name": "HU-007: Table Lifecycle Management",
+		"description": "Collection for testing table status updates (AVAILABLE → OCCUPIED → SERVED → CLEANING → AVAILABLE)\n\n**Prerequisites:**\n- Set environment variables: `base_url`, `waiter_token`, `admin_token`\n- Ensure Auth0 is configured with `update:tables` permission\n- Create a table first using the Create Table endpoint",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Setup - Create Test Table",
+			"item": [
+				{
+					"name": "Create Table A1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has table ID\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.id).to.be.a('number');",
+									"    pm.environment.set(\"table_id\", jsonData.id);",
+									"});",
+									"",
+									"pm.test(\"Table status is AVAILABLE\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"AVAILABLE\");",
+									"});",
+									"",
+									"pm.test(\"lastStateChangeAt is set\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.lastStateChangeAt).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tableNumber\": \"A1\",\n  \"capacity\": 4\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables"
+							]
+						},
+						"description": "Create a test table that will be used for lifecycle testing. Requires admin:all permission."
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order for Table (Manual)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response has order tasks\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.tasksCreated).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"tableNumber\": \"A1\",\n  \"products\": [\n    {\n      \"name\": \"Coca Cola\",\n      \"type\": \"DRINK\"\n    },\n    {\n      \"name\": \"Hamburguesa\",\n      \"type\": \"HOT_DISH\"\n    }\n  ]\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/orders",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"orders"
+							]
+						},
+						"description": "Create an order for the table so it can be marked as OCCUPIED. This step is REQUIRED before changing status to OCCUPIED."
+					},
+					"response": []
+				}
+			],
+			"description": "Setup endpoints to create test data"
+		},
+		{
+			"name": "Happy Path - Complete Lifecycle",
+			"item": [
+				{
+					"name": "1. Get Table - Verify AVAILABLE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Table status is AVAILABLE\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"AVAILABLE\");",
+									"});",
+									"",
+									"pm.test(\"Table has currentOrderId\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.currentOrderId).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}"
+							]
+						},
+						"description": "Verify initial table state is AVAILABLE and has an order assigned."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Update to OCCUPIED",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Table status is OCCUPIED\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"OCCUPIED\");",
+									"});",
+									"",
+									"pm.test(\"lastStateChangeAt updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.lastStateChangeAt).to.exist;",
+									"});",
+									"",
+									"pm.test(\"currentOrderId is preserved\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.currentOrderId).to.be.a('number');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"OCCUPIED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Mark table as OCCUPIED (customers seated, order placed). Requires active order."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Update to SERVED",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Table status is SERVED\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"SERVED\");",
+									"});",
+									"",
+									"pm.test(\"lastStateChangeAt updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.lastStateChangeAt).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"SERVED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Mark table as SERVED (food delivered, customers eating)."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Update to CLEANING",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Table status is CLEANING\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"CLEANING\");",
+									"});",
+									"",
+									"pm.test(\"lastStateChangeAt updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.lastStateChangeAt).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"CLEANING\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Mark table as CLEANING (customers left, cleaning in progress)."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Update to AVAILABLE",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Table status is AVAILABLE\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"AVAILABLE\");",
+									"});",
+									"",
+									"pm.test(\"currentOrderId is null\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.currentOrderId).to.be.null;",
+									"});",
+									"",
+									"pm.test(\"lastStateChangeAt updated\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.lastStateChangeAt).to.exist;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"AVAILABLE\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Mark table as AVAILABLE (cleaning complete, ready for new customers). This automatically clears the order."
+					},
+					"response": []
+				}
+			],
+			"description": "Complete table lifecycle: AVAILABLE → OCCUPIED → SERVED → CLEANING → AVAILABLE"
+		},
+		{
+			"name": "Error Scenarios",
+			"item": [
+				{
+					"name": "Invalid Transition - Skip State",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409 Conflict\", function () {",
+									"    pm.response.to.have.status(409);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions invalid transition\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include(\"transition\");",
+									"});",
+									"",
+									"pm.test(\"Response includes valid transitions\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"Valid transitions\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// First set table to AVAILABLE",
+									"const setAvailable = {",
+									"  url: pm.environment.get(\"base_url\") + '/api/tables/' + pm.environment.get(\"table_id\") + '/status',",
+									"  method: 'PATCH',",
+									"  header: {",
+									"    'Content-Type': 'application/json',",
+									"    'Authorization': 'Bearer ' + pm.environment.get(\"waiter_token\")",
+									"  },",
+									"  body: {",
+									"    mode: 'raw',",
+									"    raw: JSON.stringify({ newStatus: \"AVAILABLE\" })",
+									"  }",
+									"};",
+									"",
+									"pm.sendRequest(setAvailable, function (err, response) {",
+									"    console.log('Table set to AVAILABLE');;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"SERVED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Try to skip from AVAILABLE to SERVED (must go through OCCUPIED first). Should return 409 Conflict."
+					},
+					"response": []
+				},
+				{
+					"name": "OCCUPIED Without Order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions order required\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"order\");",
+									"});",
+									"",
+									"pm.test(\"Error provides guidance\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"assign an order\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// First set table to AVAILABLE (which clears order)",
+									"const setAvailable = {",
+									"  url: pm.environment.get(\"base_url\") + '/api/tables/' + pm.environment.get(\"table_id\") + '/status',",
+									"  method: 'PATCH',",
+									"  header: {",
+									"    'Content-Type': 'application/json',",
+									"    'Authorization': 'Bearer ' + pm.environment.get(\"waiter_token\")",
+									"  },",
+									"  body: {",
+									"    mode: 'raw',",
+									"    raw: JSON.stringify({ newStatus: \"AVAILABLE\" })",
+									"  }",
+									"};",
+									"",
+									"pm.sendRequest(setAvailable, function (err, response) {",
+									"    console.log('Table set to AVAILABLE (order cleared)');;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"OCCUPIED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Try to mark table as OCCUPIED without an active order. Should return 400 Bad Request."
+					},
+					"response": []
+				},
+				{
+					"name": "Null Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 Bad Request\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions null status\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.message).to.include(\"null\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": null\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Try to update with null status. Should return 400 Bad Request."
+					},
+					"response": []
+				},
+				{
+					"name": "Table Not Found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404 Not Found\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions table not found\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include(\"not found\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{waiter_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"OCCUPIED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/99999/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"99999",
+								"status"
+							]
+						},
+						"description": "Try to update non-existent table. Should return 404 Not Found."
+					},
+					"response": []
+				}
+			],
+			"description": "Test error scenarios and validation"
+		},
+		{
+			"name": "Authorization Tests",
+			"item": [
+				{
+					"name": "Admin Can Update Table Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Admin can update table status\", function () {",
+									"    pm.response.to.be.success;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// First ensure table is AVAILABLE",
+									"const setAvailable = {",
+									"  url: pm.environment.get(\"base_url\") + '/api/tables/' + pm.environment.get(\"table_id\") + '/status',",
+									"  method: 'PATCH',",
+									"  header: {",
+									"    'Content-Type': 'application/json',",
+									"    'Authorization': 'Bearer ' + pm.environment.get(\"admin_token\")",
+									"  },",
+									"  body: {",
+									"    mode: 'raw',",
+									"    raw: JSON.stringify({ newStatus: \"AVAILABLE\" })",
+									"  }",
+									"};",
+									"",
+									"pm.sendRequest(setAvailable);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{admin_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"CLEANING\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Verify admin (with admin:all permission) can update table status."
+					},
+					"response": []
+				},
+				{
+					"name": "No Token - 401 Unauthorized",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 401 Unauthorized\", function () {",
+									"    pm.response.to.have.status(401);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"OCCUPIED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Try to update table status without authentication. Should return 401 Unauthorized."
+					},
+					"response": []
+				},
+				{
+					"name": "Kitchen Staff - 403 Forbidden",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 403 Forbidden\", function () {",
+									"    pm.response.to.have.status(403);",
+									"});",
+									"",
+									"pm.test(\"Error message mentions forbidden or permissions\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error.toLowerCase()).to.be.oneOf(['forbidden', 'access denied']);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{kitchen_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"newStatus\": \"OCCUPIED\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/tables/{{table_id}}/status",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"tables",
+								"{{table_id}}",
+								"status"
+							]
+						},
+						"description": "Try to update table status with kitchen staff token (lacks update:tables permission). Should return 403 Forbidden."
+					},
+					"response": []
+				}
+			],
+			"description": "Test authorization rules for the endpoint"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080",
+			"type": "string"
+		}
+	]
+}

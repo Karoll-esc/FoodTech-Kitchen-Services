@@ -31,6 +31,9 @@ public final class Permissions {
     public static final String UPDATE_TASKS_HOT_KITCHEN = "update:tasks:hot-kitchen";
     public static final String UPDATE_TASKS_COLD_KITCHEN = "update:tasks:cold-kitchen";
 
+    // Table permissions (HU-007)
+    public static final String UPDATE_TABLES = "update:tables";
+
     // Admin permissions
     public static final String ADMIN_ALL = "admin:all";
 

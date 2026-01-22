@@ -61,6 +61,7 @@ public class TableEntityMapper {
      *   <li>capacity (number of diners)</li>
      *   <li>status (operational state)</li>
      *   <li>currentOrderId (nullable, for occupied tables)</li>
+     *   <li>lastStateChangeAt (timestamp of last status change)</li>
      *   <li>createdAt, updatedAt (audit timestamps)</li>
      * </ul>
      * 
@@ -78,6 +79,7 @@ public class TableEntityMapper {
         entity.setCapacity(table.getCapacity());
         entity.setStatus(table.getStatus());
         entity.setCurrentOrderId(table.getCurrentOrderId());
+        entity.setLastStateChangeAt(table.getLastStateChangeAt());
         entity.setCreatedAt(table.getCreatedAt());
         entity.setUpdatedAt(table.getUpdatedAt());
         
@@ -94,6 +96,7 @@ public class TableEntityMapper {
      *   <li>capacity (number of diners)</li>
      *   <li>status (operational state)</li>
      *   <li>currentOrderId (nullable, for occupied tables)</li>
+     *   <li>lastStateChangeAt (timestamp of last status change)</li>
      *   <li>createdAt, updatedAt (audit timestamps)</li>
      * </ul>
      * 
@@ -112,7 +115,8 @@ public class TableEntityMapper {
             entity.getStatus(),
             entity.getCurrentOrderId(),
             entity.getCreatedAt(),
-            entity.getUpdatedAt()
+            entity.getUpdatedAt(),
+            entity.getLastStateChangeAt()
         );
     }
 }

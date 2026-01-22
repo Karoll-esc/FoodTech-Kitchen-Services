@@ -59,9 +59,10 @@ public class ApplicationConfig {
     public ProcessOrderPort processOrderPort(
             OrderRepository orderRepository,
             TaskDecomposer taskDecomposer,
-            TaskRepository taskRepository
+            TaskRepository taskRepository,
+            TableRepository tableRepository
     ) {
-        return new ProcessOrderUseCase(orderRepository, taskDecomposer, taskRepository);
+        return new ProcessOrderUseCase(orderRepository, taskDecomposer, taskRepository, tableRepository);
     }
 
     @Bean
@@ -180,5 +181,22 @@ public class ApplicationConfig {
             com.foodtech.kitchen.application.ports.out.TableRepository tableRepository
     ) {
         return new GetTableByIdUseCase(tableRepository);
+    }
+
+    // ============================================================================
+    // Table Lifecycle Management Use Cases (HU-007)
+    // ============================================================================
+
+    @Bean
+    public TableLifecycleValidator tableLifecycleValidator() {
+        return new TableLifecycleValidator();
+    }
+
+    @Bean
+    public UpdateTableStatusPort updateTableStatusPort(
+            com.foodtech.kitchen.application.ports.out.TableRepository tableRepository,
+            TableLifecycleValidator tableLifecycleValidator
+    ) {
+        return new UpdateTableStatusUseCase(tableRepository, tableLifecycleValidator);
     }
 }

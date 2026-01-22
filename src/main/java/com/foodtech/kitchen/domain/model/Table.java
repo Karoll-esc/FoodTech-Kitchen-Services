@@ -66,6 +66,7 @@ public class Table {
     private Long currentOrderId;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime lastStateChangeAt;
     
     /**
      * Crea una nueva mesa con número y capacidad especificados.
@@ -102,6 +103,7 @@ public class Table {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
+        this.lastStateChangeAt = now;
     }
     
     /**
@@ -115,6 +117,7 @@ public class Table {
      *   <li>status: AVAILABLE</li>
      *   <li>createdAt: LocalDateTime.now()</li>
      *   <li>updatedAt: LocalDateTime.now()</li>
+     *   <li>lastStateChangeAt: createdAt</li>
      * </ul>
      * 
      * @param id el ID de la mesa (generado por la base de datos)
@@ -138,6 +141,48 @@ public class Table {
         this.currentOrderId = currentOrderId;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.updatedAt = updatedAt != null ? updatedAt : LocalDateTime.now();
+        this.lastStateChangeAt = this.createdAt;
+    }
+    
+    /**
+     * Constructor completo para reconstruir una mesa desde la base de datos (incluye lastStateChangeAt).
+     * 
+     * <p>Este constructor es utilizado por el adaptador de persistencia para reconstruir
+     * entidades de dominio desde registros de base de datos que incluyen el timestamp
+     * de último cambio de estado (implementado en HU-007).</p>
+     * 
+     * <p><strong>Valores por defecto si son null:</strong></p>
+     * <ul>
+     *   <li>status: AVAILABLE</li>
+     *   <li>createdAt: LocalDateTime.now()</li>
+     *   <li>updatedAt: LocalDateTime.now()</li>
+     *   <li>lastStateChangeAt: createdAt</li>
+     * </ul>
+     * 
+     * @param id el ID de la mesa (generado por la base de datos)
+     * @param tableNumber el número de la mesa
+     * @param capacity la capacidad de comensales
+     * @param status el estado actual (puede ser null, se usa AVAILABLE por defecto)
+     * @param currentOrderId el ID del pedido actual (puede ser null)
+     * @param createdAt fecha de creación (puede ser null, se usa now() por defecto)
+     * @param updatedAt fecha de última actualización (puede ser null, se usa now() por defecto)
+     * @param lastStateChangeAt fecha del último cambio de estado (puede ser null, se usa createdAt por defecto)
+     * @throws IllegalArgumentException si tableNumber es null/vacío o capacity es <= 0
+     */
+    public Table(Long id, String tableNumber, int capacity, TableStatus status, 
+                 Long currentOrderId, LocalDateTime createdAt, LocalDateTime updatedAt,
+                 LocalDateTime lastStateChangeAt) {
+        validateTableNumber(tableNumber);
+        validateCapacity(capacity);
+        
+        this.id = id;
+        this.tableNumber = tableNumber;
+        this.capacity = capacity;
+        this.status = status != null ? status : TableStatus.AVAILABLE;
+        this.currentOrderId = currentOrderId;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
+        this.updatedAt = updatedAt != null ? updatedAt : LocalDateTime.now();
+        this.lastStateChangeAt = lastStateChangeAt != null ? lastStateChangeAt : this.createdAt;
     }
     
     /**
@@ -182,6 +227,7 @@ public class Table {
      * <ul>
      *   <li>Actualiza el campo status al nuevo estado</li>
      *   <li>Actualiza updatedAt con LocalDateTime.now()</li>
+     *   <li>Actualiza lastStateChangeAt con LocalDateTime.now()</li>
      * </ul>
      * 
      * <p><strong>Uso en HU-007:</strong> Este método será utilizado para gestionar
@@ -199,7 +245,9 @@ public class Table {
             );
         }
         this.status = newStatus;
-        this.updatedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.updatedAt = now;
+        this.lastStateChangeAt = now;
     }
     
     /**
@@ -321,4 +369,11 @@ public class Table {
      * @return la fecha de última actualización (nunca null)
      */
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    
+    /**
+     * Obtiene la fecha y hora del último cambio de estado de la mesa.
+     * 
+     * @return la fecha del último cambio de estado (nunca null)
+     */
+    public LocalDateTime getLastStateChangeAt() { return lastStateChangeAt; }
 }
