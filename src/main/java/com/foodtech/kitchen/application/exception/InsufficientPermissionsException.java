@@ -14,13 +14,13 @@ package com.foodtech.kitchen.application.exception;
  *   <li>Se lanza desde casos de uso que requieren autorización</li>
  * </ul>
  * 
- * <p><strong>Uso en HU-007:</strong> Validación de que solo WAITER o ADMIN
- * pueden cambiar el estado de las mesas. Personal de cocina (KITCHEN_BAR,
- * KITCHEN_HOT, KITCHEN_COLD) no puede modificar estados de mesa.</p>
+ * <p><strong>Uso en HU-007:</strong> Validación de que solo usuarios con permisos
+ * update:tables o admin:all pueden cambiar el estado de las mesas. Personal de cocina
+ * (KITCHEN_BAR, KITCHEN_HOT, KITCHEN_COLD) no puede modificar estados de mesa.</p>
  * 
  * <p><strong>Ejemplo de uso:</strong></p>
  * <pre>{@code
- * if (!user.hasAnyRole("WAITER", "ADMIN")) {
+ * if (!user.hasAnyRole("update:tables", "admin:all")) {
  *     throw new InsufficientPermissionsException("update table status");
  * }
  * }</pre>
@@ -55,7 +55,7 @@ public class InsufficientPermissionsException extends RuntimeException {
     private static String buildMessage(final String operation) {
         return String.format(
             "Insufficient permissions to perform operation: %s. " +
-            "Only users with WAITER or ADMIN roles are allowed to perform this action.",
+            "Only users with update:tables or admin:all permissions are allowed to perform this action.",
             operation
         );
     }

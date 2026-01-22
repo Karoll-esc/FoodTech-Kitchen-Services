@@ -145,6 +145,47 @@ public class Table {
     }
     
     /**
+     * Constructor completo para reconstruir una mesa desde la base de datos (incluye lastStateChangeAt).
+     * 
+     * <p>Este constructor es utilizado por el adaptador de persistencia para reconstruir
+     * entidades de dominio desde registros de base de datos que incluyen el timestamp
+     * de último cambio de estado (implementado en HU-007).</p>
+     * 
+     * <p><strong>Valores por defecto si son null:</strong></p>
+     * <ul>
+     *   <li>status: AVAILABLE</li>
+     *   <li>createdAt: LocalDateTime.now()</li>
+     *   <li>updatedAt: LocalDateTime.now()</li>
+     *   <li>lastStateChangeAt: createdAt</li>
+     * </ul>
+     * 
+     * @param id el ID de la mesa (generado por la base de datos)
+     * @param tableNumber el número de la mesa
+     * @param capacity la capacidad de comensales
+     * @param status el estado actual (puede ser null, se usa AVAILABLE por defecto)
+     * @param currentOrderId el ID del pedido actual (puede ser null)
+     * @param createdAt fecha de creación (puede ser null, se usa now() por defecto)
+     * @param updatedAt fecha de última actualización (puede ser null, se usa now() por defecto)
+     * @param lastStateChangeAt fecha del último cambio de estado (puede ser null, se usa createdAt por defecto)
+     * @throws IllegalArgumentException si tableNumber es null/vacío o capacity es <= 0
+     */
+    public Table(Long id, String tableNumber, int capacity, TableStatus status, 
+                 Long currentOrderId, LocalDateTime createdAt, LocalDateTime updatedAt,
+                 LocalDateTime lastStateChangeAt) {
+        validateTableNumber(tableNumber);
+        validateCapacity(capacity);
+        
+        this.id = id;
+        this.tableNumber = tableNumber;
+        this.capacity = capacity;
+        this.status = status != null ? status : TableStatus.AVAILABLE;
+        this.currentOrderId = currentOrderId;
+        this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
+        this.updatedAt = updatedAt != null ? updatedAt : LocalDateTime.now();
+        this.lastStateChangeAt = lastStateChangeAt != null ? lastStateChangeAt : this.createdAt;
+    }
+    
+    /**
      * Valida que el número de mesa sea válido.
      * 
      * <p>Un número de mesa válido debe cumplir:</p>

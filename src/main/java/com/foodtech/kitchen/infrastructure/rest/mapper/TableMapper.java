@@ -56,6 +56,7 @@ public class TableMapper {
             table.getCapacity(),
             table.getStatus(),
             table.getCurrentOrderId(),
+            table.getLastStateChangeAt(),
             table.getCreatedAt(),
             table.getUpdatedAt()
         );

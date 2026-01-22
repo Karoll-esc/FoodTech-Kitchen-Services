@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
  *   <li>capacity: Number of diners the table can accommodate</li>
  *   <li>status: Current operational status (AVAILABLE, OCCUPIED, SERVED, CLEANING)</li>
  *   <li>current_order_id: FK to orders table (nullable, only set when OCCUPIED/SERVED)</li>
+ *   <li>last_state_change_at: Timestamp of last status change (for HU-007 lifecycle tracking)</li>
  *   <li>created_at: Timestamp when table was registered</li>
  *   <li>updated_at: Timestamp of last modification</li>
  * </ul>
@@ -36,7 +37,7 @@ import java.time.LocalDateTime;
  * <ul>
  *   <li>table_number must be unique (enforced by database constraint)</li>
  *   <li>table_number max length: 10 characters</li>
- *   <li>capacity, table_number, status, created_at, updated_at are NOT NULL</li>
+ *   <li>capacity, table_number, status, last_state_change_at, created_at, updated_at are NOT NULL</li>
  * </ul>
  * 
  * <p><strong>Usage:</strong></p>
@@ -77,6 +78,9 @@ public class TableEntity {
     @Column(name = "current_order_id")
     private Long currentOrderId;
     
+    @Column(name = "last_state_change_at", nullable = false)
+    private LocalDateTime lastStateChangeAt;
+    
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
     
@@ -90,6 +94,7 @@ public class TableEntity {
      * <ul>
      *   <li>createdAt = current timestamp</li>
      *   <li>updatedAt = current timestamp</li>
+     *   <li>lastStateChangeAt = current timestamp</li>
      *   <li>status = AVAILABLE (if not explicitly set)</li>
      * </ul>
      * 
@@ -103,6 +108,7 @@ public class TableEntity {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
+        this.lastStateChangeAt = now;
         if (this.status == null) {
             this.status = TableStatus.AVAILABLE;
         }
@@ -149,4 +155,7 @@ public class TableEntity {
     
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
+    public LocalDateTime getLastStateChangeAt() { return lastStateChangeAt; }
+    public void setLastStateChangeAt(LocalDateTime lastStateChangeAt) { this.lastStateChangeAt = lastStateChangeAt; }
 }

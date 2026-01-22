@@ -6,6 +6,7 @@ import com.foodtech.kitchen.domain.model.TableStatus;
 import com.foodtech.kitchen.application.usecases.CreateTableUseCase;
 import com.foodtech.kitchen.application.usecases.GetAllTablesUseCase;
 import com.foodtech.kitchen.application.usecases.GetTableByIdUseCase;
+import com.foodtech.kitchen.application.ports.in.UpdateTableStatusPort;
 import com.foodtech.kitchen.application.exception.TableAlreadyExistsException;
 import com.foodtech.kitchen.application.exception.TableNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.CreateTableRequest;
@@ -52,6 +53,9 @@ class TableControllerIntegrationTest {
 
     @MockBean
     private GetTableByIdUseCase getTableByIdUseCase;
+
+    @MockBean
+    private UpdateTableStatusPort updateTableStatusPort;
 
     @Test
     @WithMockUser(authorities = "admin:all")

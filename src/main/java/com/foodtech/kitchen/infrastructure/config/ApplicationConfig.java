@@ -181,4 +181,21 @@ public class ApplicationConfig {
     ) {
         return new GetTableByIdUseCase(tableRepository);
     }
+
+    // ============================================================================
+    // Table Lifecycle Management Use Cases (HU-007)
+    // ============================================================================
+
+    @Bean
+    public TableLifecycleValidator tableLifecycleValidator() {
+        return new TableLifecycleValidator();
+    }
+
+    @Bean
+    public UpdateTableStatusPort updateTableStatusPort(
+            com.foodtech.kitchen.application.ports.out.TableRepository tableRepository,
+            TableLifecycleValidator tableLifecycleValidator
+    ) {
+        return new UpdateTableStatusUseCase(tableRepository, tableLifecycleValidator);
+    }
 }

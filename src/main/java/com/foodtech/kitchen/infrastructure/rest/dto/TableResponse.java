@@ -21,6 +21,7 @@ import java.time.LocalDateTime;
  *   <li>capacity: Number of diners the table can accommodate</li>
  *   <li>status: Operational state (AVAILABLE, OCCUPIED, SERVED, CLEANING)</li>
  *   <li>currentOrderId: FK to orders table (nullable, only set when OCCUPIED/SERVED)</li>
+ *   <li>lastStateChangeAt: Timestamp of last status change (HU-007)</li>
  *   <li>createdAt: Timestamp when table was registered</li>
  *   <li>updatedAt: Timestamp of last modification</li>
  * </ul>
@@ -30,6 +31,7 @@ import java.time.LocalDateTime;
  *   <li>POST /api/tables response (201 Created)</li>
  *   <li>GET /api/tables response (200 OK, array of TableResponse)</li>
  *   <li>GET /api/tables/{id} response (200 OK)</li>
+ *   <li>PATCH /api/tables/{id}/status response (200 OK) - HU-007</li>
  * </ul>
  * 
  * <p><strong>Example JSON:</strong></p>
@@ -40,6 +42,7 @@ import java.time.LocalDateTime;
  *   "capacity": 4,
  *   "status": "AVAILABLE",
  *   "currentOrderId": null,
+ *   "lastStateChangeAt": "2026-01-21T16:00:00",
  *   "createdAt": "2026-01-21T16:00:00",
  *   "updatedAt": "2026-01-21T16:00:00"
  * }
@@ -68,6 +71,9 @@ public class TableResponse {
     @JsonProperty("currentOrderId")
     private Long currentOrderId;
     
+    @JsonProperty("lastStateChangeAt")
+    private LocalDateTime lastStateChangeAt;
+    
     @JsonProperty("createdAt")
     private LocalDateTime createdAt;
     
@@ -87,16 +93,19 @@ public class TableResponse {
      * @param capacity number of diners
      * @param status operational state
      * @param currentOrderId nullable, ID of current order
+     * @param lastStateChangeAt timestamp of last status change
      * @param createdAt registration timestamp
      * @param updatedAt last modification timestamp
      */
     public TableResponse(Long id, String tableNumber, Integer capacity, TableStatus status,
-                        Long currentOrderId, LocalDateTime createdAt, LocalDateTime updatedAt) {
+                        Long currentOrderId, LocalDateTime lastStateChangeAt,
+                        LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.id = id;
         this.tableNumber = tableNumber;
         this.capacity = capacity;
         this.status = status;
         this.currentOrderId = currentOrderId;
+        this.lastStateChangeAt = lastStateChangeAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -115,6 +124,9 @@ public class TableResponse {
     
     public Long getCurrentOrderId() { return currentOrderId; }
     public void setCurrentOrderId(Long currentOrderId) { this.currentOrderId = currentOrderId; }
+    
+    public LocalDateTime getLastStateChangeAt() { return lastStateChangeAt; }
+    public void setLastStateChangeAt(LocalDateTime lastStateChangeAt) { this.lastStateChangeAt = lastStateChangeAt; }
     
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

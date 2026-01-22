@@ -1,11 +1,14 @@
 package com.foodtech.kitchen.infrastructure.rest.exception;
 
+import com.foodtech.kitchen.application.exception.InsufficientPermissionsException;
+import com.foodtech.kitchen.application.exception.InvalidTableTransitionException;
 import com.foodtech.kitchen.application.exception.OrderNotFoundException;
 import com.foodtech.kitchen.application.exception.ProductAlreadyExistsException;
 import com.foodtech.kitchen.application.exception.ProductNotFoundException;
 import com.foodtech.kitchen.application.exception.StationAuthorizationException;
 import com.foodtech.kitchen.application.exception.TableAlreadyExistsException;
 import com.foodtech.kitchen.application.exception.TableNotFoundException;
+import com.foodtech.kitchen.application.exception.TableWithoutActiveOrderException;
 import com.foodtech.kitchen.application.exception.TaskNotFoundException;
 import com.foodtech.kitchen.infrastructure.rest.dto.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -216,6 +219,124 @@ public class GlobalExceptionHandler {
             HttpStatus.NOT_FOUND.value()
         );
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
+    /**
+     * Handles InvalidTableTransitionException thrown when attempting an invalid table status transition (HU-007).
+     * 
+     * <p>This exception is thrown by UpdateTableStatusUseCase when a user attempts to change
+     * a table's status in a way that violates the valid state transition flow:</p>
+     * <ul>
+     *   <li>AVAILABLE → OCCUPIED</li>
+     *   <li>OCCUPIED → SERVED</li>
+     *   <li>SERVED → CLEANING</li>
+     *   <li>CLEANING → AVAILABLE</li>
+     * </ul>
+     * 
+     * <p><strong>Common Invalid Transitions:</strong></p>
+     * <ul>
+     *   <li>AVAILABLE → SERVED (must go through OCCUPIED first)</li>
+     *   <li>OCCUPIED → CLEANING (must serve food first)</li>
+     *   <li>Any status → same status (no-op transitions rejected)</li>
+     * </ul>
+     * 
+     * <p><strong>HTTP Response Example:</strong></p>
+     * <pre>
+     * Status: 409 Conflict
+     * Body: {
+     *   "error": "Invalid table state transition",
+     *   "message": "Cannot transition from AVAILABLE to SERVED. Valid transitions from AVAILABLE are: [OCCUPIED]",
+     *   "status": 409
+     * }
+     * </pre>
+     * 
+     * @param ex the InvalidTableTransitionException containing transition details
+     * @return ResponseEntity with 409 Conflict status and error details
+     * @see InvalidTableTransitionException
+     * @see com.foodtech.kitchen.application.usecases.UpdateTableStatusUseCase
+     */
+    @ExceptionHandler(InvalidTableTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTableTransition(InvalidTableTransitionException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Invalid table state transition",
+            ex.getMessage(),
+            HttpStatus.CONFLICT.value()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+    }
+
+    /**
+     * Handles TableWithoutActiveOrderException thrown when attempting to mark a table as OCCUPIED without an order (HU-007).
+     * 
+     * <p>This exception is thrown by UpdateTableStatusUseCase when a user attempts to transition
+     * a table to OCCUPIED status but the table has no active order assigned (currentOrderId is null).</p>
+     * 
+     * <p><strong>Business Rule:</strong> A table can only be marked as OCCUPIED if it has an active order.
+     * This ensures that the operational flow is: 1) Client arrives → 2) Order created → 3) Table marked as occupied.</p>
+     * 
+     * <p><strong>HTTP Response Example:</strong></p>
+     * <pre>
+     * Status: 400 Bad Request
+     * Body: {
+     *   "error": "Table requires active order",
+     *   "message": "Table A1 cannot be marked as OCCUPIED without an active order. 
+     *               Please assign an order to the table before marking it as occupied.",
+     *   "status": 400
+     * }
+     * </pre>
+     * 
+     * @param ex the TableWithoutActiveOrderException containing the table number
+     * @return ResponseEntity with 400 Bad Request status and error details
+     * @see TableWithoutActiveOrderException
+     * @see com.foodtech.kitchen.application.usecases.UpdateTableStatusUseCase
+     */
+    @ExceptionHandler(TableWithoutActiveOrderException.class)
+    public ResponseEntity<ErrorResponse> handleTableWithoutActiveOrder(TableWithoutActiveOrderException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Table requires active order",
+            ex.getMessage(),
+            HttpStatus.BAD_REQUEST.value()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    /**
+     * Handles InsufficientPermissionsException thrown when a user lacks required role for an operation (HU-007).
+     * 
+     * <p>This exception is thrown when a user attempts to perform an operation that requires
+     * specific permissions (update:tables or admin:all) but the user does not have the necessary permissions.
+     * Currently used for table lifecycle management operations.</p>
+     * 
+     * <p><strong>Common Scenarios:</strong></p>
+     * <ul>
+     *   <li>Kitchen staff trying to change table status → 403 Forbidden (only update:tables or admin:all allowed)</li>
+     *   <li>Guest user trying to update table status → 403 Forbidden</li>
+     * </ul>
+     * 
+     * <p><strong>HTTP Response Example:</strong></p>
+     * <pre>
+     * Status: 403 Forbidden
+     * Body: {
+     *   "error": "Insufficient permissions",
+     *   "message": "Insufficient permissions to perform operation: update table status. 
+     *               Only users with update:tables or admin:all permissions are allowed to perform this action.",
+     *   "status": 403
+     * }
+     * </pre>
+     * 
+     * @param ex the InsufficientPermissionsException containing the operation details
+     * @return ResponseEntity with 403 Forbidden status and error details
+     * @see InsufficientPermissionsException
+     * @see com.foodtech.kitchen.application.usecases.UpdateTableStatusUseCase
+     */
+    @ExceptionHandler(InsufficientPermissionsException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientPermissions(InsufficientPermissionsException ex) {
+        ErrorResponse error = new ErrorResponse(
+            "Insufficient permissions",
+            ex.getMessage(),
+            HttpStatus.FORBIDDEN.value()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
