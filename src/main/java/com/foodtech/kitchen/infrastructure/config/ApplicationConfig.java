@@ -59,9 +59,10 @@ public class ApplicationConfig {
     public ProcessOrderPort processOrderPort(
             OrderRepository orderRepository,
             TaskDecomposer taskDecomposer,
-            TaskRepository taskRepository
+            TaskRepository taskRepository,
+            TableRepository tableRepository
     ) {
-        return new ProcessOrderUseCase(orderRepository, taskDecomposer, taskRepository);
+        return new ProcessOrderUseCase(orderRepository, taskDecomposer, taskRepository, tableRepository);
     }
 
     @Bean
