@@ -498,96 +498,81 @@ Scenario: Precio siempre presente en respuestas de productos
 
 ---
 
-# HU-007: Gestión del ciclo de vida de las mesas
+# HU-002: Gestión manual del ciclo de vida de las mesas
 
 ### Descripción
 
-**Como** sistema de gestión del restaurante
-**Quiero** automatizar y controlar el cambio de estado de las mesas según los eventos del servicio
-**Para** garantizar que la disponibilidad y el flujo operativo se reflejen correctamente en tiempo real
+**Como** mesero
+**Quiero** actualizar manualmente el estado de las mesas a medida que avanza el servicio
+**Para** tener un control preciso sobre la disponibilidad real del salón y el progreso de cada mesa
 
-> **Nota:** Esta historia se centra exclusivamente en la **lógica de transición y validación de estados**. La creación administrativa de las mesas se cubre en la **HU-005**.
+> **Nota:** Esta historia modifica el comportamiento sugerido en la **HU-005**, eliminando las transiciones automáticas en favor de una gestión supervisada por el personal.
 
 ---
 
 ### Reglas de Negocio
 
-* **Estado Único:** Una mesa solo puede residir en un estado a la vez.
-* **Estados Válidos:** Los estados permitidos son `AVAILABLE`, `OCCUPIED`, `SERVED` y `CLEANING`.
-* **Flujo de Transición:** El sistema debe restringir los cambios de estado para seguir estrictamente el flujo operativo:
-1. `AVAILABLE` → `OCCUPIED` (Al crear pedido)
-2. `OCCUPIED` → `SERVED` (Al completar todas las tareas de cocina/barra)
-3. `SERVED` → `CLEANING` (Al retirarse los clientes)
-4. `CLEANING` → `AVAILABLE` (Al finalizar la limpieza)
-
+* **Intervención Humana:** Ningún evento del sistema (creación de pedido o finalización de tareas) debe alterar el estado de la mesa sin una acción explícita del usuario.
+* **Restricción de Flujo:** Aunque el cambio sea manual, el sistema solo debe permitir transiciones lógicas para evitar errores operativos (ej. no se puede pasar de `AVAILABLE` a `SERVED` directamente).
+* **Visibilidad de Pedido:** Para pasar una mesa a `OCCUPIED`, el sistema debe verificar que la mesa tiene al menos un pedido activo registrado.
 
 ---
 
 ### Criterios de Aceptación
 
-#### Escenario 1: Estado inicial por defecto
+#### Escenario 1: Mesero ocupa una mesa manualmente
 
 ```gherkin
-Scenario: Una mesa nueva siempre inicia disponible
-  Given que un administrador registra una nueva mesa en el sistema
-  When el registro es completado exitosamente
-  Then la mesa debe tener el estado inicial "AVAILABLE"
-  And no debe tener ningún "currentOrderId" asociado
-
-```
-
-#### Escenario 2: Cambio automático a OCCUPIED
-
-```gherkin
-Scenario: La mesa se ocupa al recibir un pedido
+Scenario: El mesero marca una mesa como ocupada al recibir clientes
   Given que existe una mesa en estado "AVAILABLE"
-  When se registra un nuevo pedido vinculado a dicha mesa
+  And el mesero ha registrado un pedido para dicha mesa
+  When el mesero selecciona la opción "Marcar como Ocupada"
   Then el sistema cambia el estado de la mesa a "OCCUPIED"
-  And el ID del pedido queda registrado en la mesa
+  And registra el momento exacto del cambio de estado
 
 ```
 
-#### Escenario 3: Cambio automático a SERVED
+#### Escenario 2: Mesero confirma que la mesa ha sido servida
 
 ```gherkin
-Scenario: La mesa se marca como servida tras completar la cocina
-  Given que existe una mesa en estado "OCCUPIED"
-  And el pedido de la mesa tiene tareas pendientes o en preparación
-  When la última tarea del pedido cambia al estado "COMPLETED"
-  Then el sistema cambia automáticamente el estado de la mesa a "SERVED"
+Scenario: Cambio manual a estado servido
+  Given que una mesa está en estado "OCCUPIED"
+  And todas las tareas de cocina aparecen como "COMPLETED" en el sistema
+  When el mesero confirma manualmente que todos los productos están en la mesa
+  Then el sistema cambia el estado de la mesa a "SERVED"
 
 ```
 
-#### Escenario 4: Transición manual a CLEANING
+#### Escenario 3: Inicio de limpieza tras el cierre de cuenta
 
 ```gherkin
-Scenario: El personal marca la mesa para limpieza
-  Given que una mesa está en estado "SERVED"
-  And los clientes han abandonado la mesa
-  When el mesero indica que la mesa requiere limpieza
-  Then el sistema actualiza el estado de la mesa a "CLEANING"
+Scenario: El mesero marca la mesa para limpieza
+  Given que la mesa está en estado "SERVED"
+  And los clientes han abandonado el establecimiento
+  When el mesero selecciona la opción "Enviar a Limpieza"
+  Then el sistema cambia el estado de la mesa a "CLEANING"
 
 ```
 
-#### Escenario 5: Retorno a disponibilidad
+#### Escenario 4: Confirmación de disponibilidad
 
 ```gherkin
-Scenario: La mesa queda lista para nuevos clientes
-  Given que una mesa está en estado "CLEANING"
-  When el personal confirma que la limpieza ha finalizado
+Scenario: Mesa lista para nuevos clientes
+  Given que la mesa está en estado "CLEANING"
+  When el personal de sala marca la limpieza como "Finalizada"
   Then el sistema cambia el estado de la mesa a "AVAILABLE"
-  And el campo "currentOrderId" se limpia (vuelve a null)
+  And desvincula el ID del pedido anterior (set null)
 
 ```
 
-#### Escenario 6: Validación de flujo (Transición Inválida)
+#### Escenario 5: Validación de permisos por rol
 
 ```gherkin
-Scenario: Bloqueo de saltos de estado no permitidos
-  Given que existe una mesa en estado "AVAILABLE"
-  When se intenta forzar el cambio de estado a "CLEANING" sin pasar por OCCUPIED
-  Then el sistema rechaza la operación
-  And notifica que la transición de estado no es válida
+Scenario: Personal de cocina intenta cambiar estado de mesa
+  Given que existe un usuario autenticado con rol "KITCHEN_BAR"
+  When el usuario intenta cambiar el estado de la mesa "A1" de "OCCUPIED" a "SERVED"
+  Then el sistema rechaza la operación por permisos insuficientes
+  And informa que solo el rol "WAITER" o "ADMIN" puede gestionar estados de mesa
 
 ```
 
