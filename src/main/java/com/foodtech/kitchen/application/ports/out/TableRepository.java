@@ -61,6 +61,18 @@ public interface TableRepository {
     boolean existsByTableNumber(String tableNumber);
     
     /**
+     * Actualiza una mesa existente.
+     * 
+     * <p>Este método actualiza los campos de una mesa ya persistida.
+     * La mesa debe tener un ID no nulo.</p>
+     * 
+     * @param table la mesa con los datos actualizados (debe tener ID)
+     * @return la mesa actualizada
+     * @throws IllegalArgumentException si la mesa no tiene ID
+     */
+    Table update(Table table);
+    
+    /**
      * Elimina una mesa por su ID.
      * 
      * @param id el ID de la mesa a eliminar
