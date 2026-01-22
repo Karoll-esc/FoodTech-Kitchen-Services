@@ -31,12 +31,16 @@ import com.foodtech.kitchen.domain.services.TableLifecycleValidator;
  * 
  * <p><strong>Flujo de ejecución:</strong></p>
  * <ol>
- *   <li>Buscar mesa por ID (lanza TableNotFoundException si no existe)</li>
- *   <li>Validar transición de estado (lanza InvalidTableTransitionException si es inválida)</li>
- *   <li>Si es OCCUPIED, validar que tenga pedido activo (lanza TableWithoutActiveOrderException)</li>
- *   <li>Si es AVAILABLE, desvincular pedido automáticamente</li>
- *   <li>Cambiar estado y actualizar lastStateChangeAt</li>
- *   <li>Persistir cambios en repositorio</li>
+ *   <li>{@link #findTableById(Long)} - Buscar mesa por ID (lanza TableNotFoundException si no existe)</li>
+ *   <li>{@link #validateStateTransition(Table, TableStatus)} - Validar transición de estado (lanza InvalidTableTransitionException si es inválida)</li>
+ *   <li>{@link #applyStatusSpecificRules(Table, TableStatus)} - Aplicar reglas específicas:
+ *     <ul>
+ *       <li>Si es OCCUPIED, validar que tenga pedido activo (lanza TableWithoutActiveOrderException)</li>
+ *       <li>Si es AVAILABLE, desvincular pedido automáticamente</li>
+ *     </ul>
+ *   </li>
+ *   <li>{@link #updateTableStatus(Table, TableStatus)} - Cambiar estado y actualizar lastStateChangeAt</li>
+ *   <li>Persistir cambios en repositorio vía {@link TableRepository#update(Table)}</li>
  * </ol>
  * 
  * <p><strong>Uso en HU-007:</strong> Gestión manual del ciclo de vida de mesas.</p>
@@ -66,11 +70,33 @@ public class UpdateTableStatusUseCase implements UpdateTableStatusPort {
     
     @Override
     public Table execute(Long tableId, TableStatus newStatus) {
-        // 1. Buscar mesa
-        Table table = tableRepository.findById(tableId)
+        Table table = findTableById(tableId);
+        validateStateTransition(table, newStatus);
+        applyStatusSpecificRules(table, newStatus);
+        updateTableStatus(table, newStatus);
+        return tableRepository.update(table);
+    }
+    
+    /**
+     * Busca una mesa por su identificador único.
+     * 
+     * @param tableId el ID de la mesa a buscar
+     * @return la mesa encontrada (nunca null)
+     * @throws TableNotFoundException si no existe una mesa con el ID especificado
+     */
+    private Table findTableById(Long tableId) {
+        return tableRepository.findById(tableId)
             .orElseThrow(() -> new TableNotFoundException(tableId));
-        
-        // 2. Validar transición
+    }
+    
+    /**
+     * Valida que la transición de estado sea permitida según las reglas del ciclo de vida.
+     * 
+     * @param table la mesa cuyo estado se validará
+     * @param newStatus el nuevo estado al que se desea transicionar
+     * @throws InvalidTableTransitionException si la transición no está permitida
+     */
+    private void validateStateTransition(Table table, TableStatus newStatus) {
         try {
             lifecycleValidator.validateTransition(table.getStatus(), newStatus);
         } catch (IllegalArgumentException e) {
@@ -80,27 +106,51 @@ public class UpdateTableStatusUseCase implements UpdateTableStatusPort {
                 table.getStatus().getValidTransitions()
             );
         }
-        
-        // 3. Validación especial para OCCUPIED: requiere pedido activo
+    }
+    
+    /**
+     * Aplica reglas específicas según el estado objetivo.
+     * 
+     * <p>Reglas aplicadas:</p>
+     * <ul>
+     *   <li>OCCUPIED: Valida que la mesa tenga un pedido activo</li>
+     *   <li>AVAILABLE: Desvincula automáticamente el pedido actual</li>
+     * </ul>
+     * 
+     * @param table la mesa a la que aplicar las reglas
+     * @param newStatus el estado objetivo que determina las reglas a aplicar
+     * @throws TableWithoutActiveOrderException si se intenta marcar como OCCUPIED sin pedido
+     */
+    private void applyStatusSpecificRules(Table table, TableStatus newStatus) {
         if (newStatus == TableStatus.OCCUPIED) {
-            try {
-                lifecycleValidator.validateCanBeOccupied(table);
-            } catch (IllegalArgumentException e) {
-                throw new TableWithoutActiveOrderException(table.getTableNumber());
-            }
+            validateTableHasActiveOrder(table);
         }
-        
-        // 4. Lógica especial para AVAILABLE: desvincular pedido
         if (newStatus == TableStatus.AVAILABLE) {
             table.clearOrder();
         }
-        
-        // 5. Cambiar estado
+    }
+    
+    /**
+     * Valida que la mesa tenga un pedido activo asignado.
+     * 
+     * @param table la mesa a validar
+     * @throws TableWithoutActiveOrderException si la mesa no tiene un pedido activo (currentOrderId es null)
+     */
+    private void validateTableHasActiveOrder(Table table) {
+        try {
+            lifecycleValidator.validateCanBeOccupied(table);
+        } catch (IllegalArgumentException e) {
+            throw new TableWithoutActiveOrderException(table.getTableNumber());
+        }
+    }
+    
+    /**
+     * Actualiza el estado de la mesa y su timestamp de última modificación.
+     * 
+     * @param table la mesa cuyo estado se actualizará
+     * @param newStatus el nuevo estado a aplicar
+     */
+    private void updateTableStatus(Table table, TableStatus newStatus) {
         table.changeStatus(newStatus);
-        
-        // 6. Persistir
-        tableRepository.update(table);
-        
-        return table;
     }
 }
