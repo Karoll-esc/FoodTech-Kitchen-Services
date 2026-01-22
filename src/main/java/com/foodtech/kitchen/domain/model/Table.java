@@ -66,6 +66,7 @@ public class Table {
     private Long currentOrderId;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private LocalDateTime lastStateChangeAt;
     
     /**
      * Crea una nueva mesa con número y capacidad especificados.
@@ -102,6 +103,7 @@ public class Table {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
+        this.lastStateChangeAt = now;
     }
     
     /**
@@ -115,6 +117,7 @@ public class Table {
      *   <li>status: AVAILABLE</li>
      *   <li>createdAt: LocalDateTime.now()</li>
      *   <li>updatedAt: LocalDateTime.now()</li>
+     *   <li>lastStateChangeAt: createdAt</li>
      * </ul>
      * 
      * @param id el ID de la mesa (generado por la base de datos)
@@ -138,6 +141,7 @@ public class Table {
         this.currentOrderId = currentOrderId;
         this.createdAt = createdAt != null ? createdAt : LocalDateTime.now();
         this.updatedAt = updatedAt != null ? updatedAt : LocalDateTime.now();
+        this.lastStateChangeAt = this.createdAt;
     }
     
     /**
@@ -182,6 +186,7 @@ public class Table {
      * <ul>
      *   <li>Actualiza el campo status al nuevo estado</li>
      *   <li>Actualiza updatedAt con LocalDateTime.now()</li>
+     *   <li>Actualiza lastStateChangeAt con LocalDateTime.now()</li>
      * </ul>
      * 
      * <p><strong>Uso en HU-007:</strong> Este método será utilizado para gestionar
@@ -199,7 +204,9 @@ public class Table {
             );
         }
         this.status = newStatus;
-        this.updatedAt = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
+        this.updatedAt = now;
+        this.lastStateChangeAt = now;
     }
     
     /**
@@ -321,4 +328,11 @@ public class Table {
      * @return la fecha de última actualización (nunca null)
      */
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    
+    /**
+     * Obtiene la fecha y hora del último cambio de estado de la mesa.
+     * 
+     * @return la fecha del último cambio de estado (nunca null)
+     */
+    public LocalDateTime getLastStateChangeAt() { return lastStateChangeAt; }
 }

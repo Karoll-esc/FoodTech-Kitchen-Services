@@ -1,5 +1,8 @@
 package com.foodtech.kitchen.domain.model;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Estados válidos para una mesa en el sistema.
  * 
@@ -84,11 +87,26 @@ public enum TableStatus {
             throw new IllegalArgumentException("New status cannot be null");
         }
         
+        if (this == newStatus) {
+            return false;
+        }
+        
         return switch (this) {
             case AVAILABLE -> newStatus == OCCUPIED;
             case OCCUPIED -> newStatus == SERVED;
             case SERVED -> newStatus == CLEANING;
             case CLEANING -> newStatus == AVAILABLE;
         };
+    }
+    
+    /**
+     * Retorna la lista de estados válidos a los que puede transicionar desde el estado actual.
+     * 
+     * @return lista de estados válidos para transición
+     */
+    public List<TableStatus> getValidTransitions() {
+        return Arrays.stream(TableStatus.values())
+            .filter(this::canTransitionTo)
+            .toList();
     }
 }
