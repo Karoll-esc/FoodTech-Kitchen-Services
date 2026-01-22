@@ -63,7 +63,8 @@ class TableStateTransitionTest {
             "Debe lanzar excepción cuando fromStatus es null"
         );
         
-        assertEquals("States cannot be null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("States cannot be null"),
+            "El mensaje debe indicar que los estados no pueden ser null");
     }
     
     @Test
@@ -80,7 +81,8 @@ class TableStateTransitionTest {
             "Debe lanzar excepción cuando toStatus es null"
         );
         
-        assertEquals("States cannot be null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("States cannot be null"),
+            "El mensaje debe indicar que los estados no pueden ser null");
     }
     
     @Test

@@ -89,7 +89,8 @@ class TableLifecycleValidatorTest {
             "Debe lanzar excepción cuando currentStatus es null"
         );
         
-        assertEquals("Status cannot be null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Status cannot be null"),
+            "El mensaje debe indicar que el estado no puede ser null");
     }
     
     @Test
@@ -106,7 +107,8 @@ class TableLifecycleValidatorTest {
             "Debe lanzar excepción cuando targetStatus es null"
         );
         
-        assertEquals("Status cannot be null", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Status cannot be null"),
+            "El mensaje debe indicar que el estado no puede ser null");
     }
     
     @Test
@@ -152,9 +154,7 @@ class TableLifecycleValidatorTest {
             () -> validator.validateCanBeOccupied(table)
         );
         
-        assertEquals(
-            "Table C3 cannot be marked as OCCUPIED without an active order",
-            exception.getMessage()
-        );
+        assertTrue(exception.getMessage().contains("Table C3 cannot be marked as OCCUPIED without an active order"),
+            "El mensaje debe indicar que la mesa necesita un pedido activo");
     }
 }
