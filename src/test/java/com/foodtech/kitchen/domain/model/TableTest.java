@@ -324,4 +324,45 @@ class TableTest {
         // Then
         assertEquals(TableStatus.AVAILABLE, table.getStatus());
     }
+    
+    @Test
+    @DisplayName("Debe actualizar lastStateChangeAt al cambiar estado")
+    void shouldUpdateLastStateChangeAtWhenChangingStatus() {
+        // Given
+        Table table = new Table("A1", 4);
+        LocalDateTime originalLastStateChangeAt = table.getLastStateChangeAt();
+        
+        // Wait a bit to ensure time difference
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        
+        // When
+        table.changeStatus(TableStatus.OCCUPIED);
+        
+        // Then
+        assertNotNull(table.getLastStateChangeAt(), "lastStateChangeAt no debe ser null");
+        assertTrue(table.getLastStateChangeAt().isAfter(originalLastStateChangeAt),
+            "lastStateChangeAt debe actualizarse con el cambio de estado");
+    }
+    
+    @Test
+    @DisplayName("Debe inicializar lastStateChangeAt al crear mesa")
+    void shouldInitializeLastStateChangeAtOnCreation() {
+        // Given
+        LocalDateTime before = LocalDateTime.now().minusSeconds(1);
+        
+        // When
+        Table table = new Table("A1", 4);
+        
+        // Then
+        LocalDateTime after = LocalDateTime.now().plusSeconds(1);
+        assertNotNull(table.getLastStateChangeAt(), "lastStateChangeAt no debe ser null");
+        assertTrue(table.getLastStateChangeAt().isAfter(before));
+        assertTrue(table.getLastStateChangeAt().isBefore(after));
+        assertEquals(table.getCreatedAt(), table.getLastStateChangeAt(),
+            "lastStateChangeAt debe ser igual a createdAt al crear la mesa");
+    }
 }

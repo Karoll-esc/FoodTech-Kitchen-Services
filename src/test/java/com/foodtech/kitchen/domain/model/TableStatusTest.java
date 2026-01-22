@@ -3,6 +3,8 @@ package com.foodtech.kitchen.domain.model;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -182,5 +184,79 @@ class TableStatusTest {
         );
         
         assertEquals("New status cannot be null", exception.getMessage());
+    }
+    
+    @Test
+    @DisplayName("No debe permitir transición al mismo estado")
+    void shouldRejectTransitionToSameState() {
+        // Given & When & Then
+        assertFalse(TableStatus.AVAILABLE.canTransitionTo(TableStatus.AVAILABLE),
+            "No se puede transicionar al mismo estado AVAILABLE");
+        assertFalse(TableStatus.OCCUPIED.canTransitionTo(TableStatus.OCCUPIED),
+            "No se puede transicionar al mismo estado OCCUPIED");
+        assertFalse(TableStatus.SERVED.canTransitionTo(TableStatus.SERVED),
+            "No se puede transicionar al mismo estado SERVED");
+        assertFalse(TableStatus.CLEANING.canTransitionTo(TableStatus.CLEANING),
+            "No se puede transicionar al mismo estado CLEANING");
+    }
+    
+    @Test
+    @DisplayName("Debe retornar lista de transiciones válidas desde AVAILABLE")
+    void shouldReturnValidTransitionsFromAvailable() {
+        // Given
+        TableStatus status = TableStatus.AVAILABLE;
+        
+        // When
+        List<TableStatus> validTransitions = status.getValidTransitions();
+        
+        // Then
+        assertEquals(1, validTransitions.size(), "AVAILABLE debe tener una sola transición válida");
+        assertTrue(validTransitions.contains(TableStatus.OCCUPIED), 
+            "AVAILABLE debe poder transicionar a OCCUPIED");
+    }
+    
+    @Test
+    @DisplayName("Debe retornar lista de transiciones válidas desde OCCUPIED")
+    void shouldReturnValidTransitionsFromOccupied() {
+        // Given
+        TableStatus status = TableStatus.OCCUPIED;
+        
+        // When
+        List<TableStatus> validTransitions = status.getValidTransitions();
+        
+        // Then
+        assertEquals(1, validTransitions.size(), "OCCUPIED debe tener una sola transición válida");
+        assertTrue(validTransitions.contains(TableStatus.SERVED), 
+            "OCCUPIED debe poder transicionar a SERVED");
+    }
+    
+    @Test
+    @DisplayName("Debe retornar lista de transiciones válidas desde SERVED")
+    void shouldReturnValidTransitionsFromServed() {
+        // Given
+        TableStatus status = TableStatus.SERVED;
+        
+        // When
+        List<TableStatus> validTransitions = status.getValidTransitions();
+        
+        // Then
+        assertEquals(1, validTransitions.size(), "SERVED debe tener una sola transición válida");
+        assertTrue(validTransitions.contains(TableStatus.CLEANING), 
+            "SERVED debe poder transicionar a CLEANING");
+    }
+    
+    @Test
+    @DisplayName("Debe retornar lista de transiciones válidas desde CLEANING")
+    void shouldReturnValidTransitionsFromCleaning() {
+        // Given
+        TableStatus status = TableStatus.CLEANING;
+        
+        // When
+        List<TableStatus> validTransitions = status.getValidTransitions();
+        
+        // Then
+        assertEquals(1, validTransitions.size(), "CLEANING debe tener una sola transición válida");
+        assertTrue(validTransitions.contains(TableStatus.AVAILABLE), 
+            "CLEANING debe poder transicionar a AVAILABLE");
     }
 }
