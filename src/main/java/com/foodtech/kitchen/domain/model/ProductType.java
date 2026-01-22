@@ -4,9 +4,9 @@ package com.foodtech.kitchen.domain.model;
 //Ahora cada ProductType conoce su Station, eliminando necesidad de ProductStationMapper.
 //Cumple OCP: agregar nuevo tipo no requiere modificar otras clases.
 public enum ProductType {
-    DRINK(Station.BAR),
-    HOT_DISH(Station.HOT_KITCHEN),
-    COLD_DISH(Station.COLD_KITCHEN);
+    BEVERAGE(Station.BEVERAGE),
+    DESSERT(Station.DESSERT),
+    BAKERY_ITEM(Station.BAKERY);
 
     private final Station station;
 

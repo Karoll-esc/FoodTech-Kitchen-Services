@@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class PrepareDrinkCommandTest {
 
     @Test
-    @DisplayName("Debe crear comando de bebida con estación correcta")
+@DisplayName("Debe crear comando de bebida con estación correcta")
     void shouldCreateDrinkCommandWithCorrectStation() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.BEVERAGE);
         List<Product> products = List.of(cocaCola);
 
         // When
@@ -28,7 +28,7 @@ class PrepareDrinkCommandTest {
     @DisplayName("Debe ejecutar la preparación de bebida")
     void shouldExecuteDrinkPreparation() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.BEVERAGE);
         PrepareDrinkCommand command = new PrepareDrinkCommand(List.of(cocaCola));
 
         // When & Then
@@ -39,8 +39,8 @@ class PrepareDrinkCommandTest {
     @DisplayName("Debe manejar múltiples bebidas en un solo comando")
     void shouldHandleMultipleDrinks() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product sprite = new Product("Sprite", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.BEVERAGE);
+        Product sprite = new Product("Sprite", ProductType.BEVERAGE);
         List<Product> products = List.of(cocaCola, sprite);
 
         // When

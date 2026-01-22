@@ -23,7 +23,7 @@ public class TaskDecomposer {
 
         // Si el order tiene ID, lo usamos; si no, usamos un ID temporal para tests
         Long orderId = order.getId() != null ? order.getId() : 0L;
-        return taskFactory.createTasks(orderId, order.getTableNumber(), productsByStation);
+        return taskFactory.createTasks(orderId, order.getTicketNumber(), order.getCustomerName(), productsByStation);
     }
 
     private Map<Station, List<Product>> groupProductsByStation(Order order) {

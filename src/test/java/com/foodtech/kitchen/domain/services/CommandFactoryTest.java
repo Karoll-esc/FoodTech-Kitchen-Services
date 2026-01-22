@@ -20,42 +20,42 @@ class CommandFactoryTest {
     }
 
     @Test
-    @DisplayName("Debe crear PrepareDrinkCommand para productos de tipo DRINK")
+    @DisplayName("Debe crear PrepareBeverageCommand para productos de tipo BEVERAGE")
     void shouldCreateDrinkCommandForDrinkProducts() {
         // Given
-        Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
+        Product cocaCola = new Product("Coca Cola", ProductType.BEVERAGE);
         List<Product> products = List.of(cocaCola);
 
         // When
-        Command command = factory.createCommand(Station.BAR, products);
+        Command command = factory.createCommand(Station.BEVERAGE, products);
 
         // Then
         assertInstanceOf(PrepareDrinkCommand.class, command);
     }
 
     @Test
-    @DisplayName("Debe crear PrepareHotDishCommand para productos de tipo HOT_DISH")
+    @DisplayName("Debe crear PrepareDessertCommand para productos de tipo DESSERT")
     void shouldCreateHotDishCommandForHotDishProducts() {
         // Given
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
-        List<Product> products = List.of(pizza);
+        Product tiramisu = new Product("Tiramisu", ProductType.DESSERT);
+        List<Product> products = List.of(tiramisu);
 
         // When
-        Command command = factory.createCommand(Station.HOT_KITCHEN, products);
+        Command command = factory.createCommand(Station.DESSERT, products);
 
         // Then
         assertInstanceOf(PrepareHotDishCommand.class, command);
     }
 
     @Test
-    @DisplayName("Debe crear PrepareColdDishCommand para productos de tipo COLD_DISH")
+    @DisplayName("Debe crear PrepareBakeryItemCommand para productos de tipo BAKERY_ITEM")
     void shouldCreateColdDishCommandForColdDishProducts() {
         // Given
-        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH);
-        List<Product> products = List.of(salad);
+        Product croissant = new Product("Croissant", ProductType.BAKERY_ITEM);
+        List<Product> products = List.of(croissant);
 
         // When
-        Command command = factory.createCommand(Station.COLD_KITCHEN, products);
+        Command command = factory.createCommand(Station.BAKERY, products);
 
         // Then
         assertInstanceOf(PrepareColdDishCommand.class, command);
@@ -65,11 +65,11 @@ class CommandFactoryTest {
     @DisplayName("Debe lanzar excepción para estación desconocida")
     void shouldThrowExceptionForUnknownStation() {
         // Given
-        Product product = new Product("Test", ProductType.DRINK);
+        Product product = new Product("Test", ProductType.BEVERAGE);
         List<Product> products = List.of(product);
 
         // When & Then
         // Este test es solo por completitud, pero con enum no puede pasar
-        assertDoesNotThrow(() -> factory.createCommand(Station.BAR, products));
+        assertDoesNotThrow(() -> factory.createCommand(Station.BEVERAGE, products));
     }
 }

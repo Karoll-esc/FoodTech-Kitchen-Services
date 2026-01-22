@@ -12,11 +12,12 @@ class TaskTest {
     @Test
     void shouldTransitionFromPendingToInPreparation() {
         // Given
-        Product product = new Product("Cerveza", ProductType.DRINK);
+        Product product = new Product("Cerveza", ProductType.BEVERAGE);
         Task task = new Task(
                 1L,
-                Station.BAR,
-                "A1",
+                Station.BEVERAGE,
+                "T-200",
+                "Cliente",
                 List.of(product),
                 LocalDateTime.now()
         );
@@ -32,11 +33,12 @@ class TaskTest {
     @Test
     void shouldTransitionFromInPreparationToCompleted() {
         // Given
-        Product product = new Product("Cerveza", ProductType.DRINK);
+        Product product = new Product("Cerveza", ProductType.BEVERAGE);
         Task task = new Task(
                 1L,
-                Station.BAR,
-                "A1",
+                Station.BEVERAGE,
+                "T-201",
+                "Cliente",
                 List.of(product),
                 LocalDateTime.now()
         );
@@ -53,11 +55,12 @@ class TaskTest {
     @Test
     void shouldNotCompleteTaskWhenNotInPreparation() {
         // Given
-        Product product = new Product("Cerveza", ProductType.DRINK);
+        Product product = new Product("Cerveza", ProductType.BEVERAGE);
         Task task = new Task(
                 1L,
-                Station.BAR,
-                "A1",
+                Station.BEVERAGE,
+                "T-202",
+                "Cliente",
                 List.of(product),
                 LocalDateTime.now()
         );

@@ -65,7 +65,7 @@ class ProductTest {
         Product product = new Product(
             "Coca Cola",
             "",
-            ProductType.DRINK,
+            ProductType.BEVERAGE,
             new Price(new BigDecimal("2.50")),
             180
         );
@@ -79,13 +79,13 @@ class ProductTest {
         Product product = new Product(
             "Mojito",
             "Cóctel de ron blanco",
-            ProductType.DRINK,
+            ProductType.BEVERAGE,
             new Price(new BigDecimal("8.50")),
             300
         );
 
-        assertEquals(ProductType.DRINK, product.getType());
-        assertEquals(Station.BAR, product.getType().getStation());
+        assertEquals(ProductType.BEVERAGE, product.getType());
+        assertEquals(Station.BEVERAGE, product.getType().getStation());
     }
 
     @Test
@@ -94,13 +94,13 @@ class ProductTest {
         Product product = new Product(
             "Ensalada César",
             "Ensalada con pollo",
-            ProductType.COLD_DISH,
+            ProductType.BAKERY_ITEM,
             new Price(new BigDecimal("8.99")),
             480
         );
 
-        assertEquals(ProductType.COLD_DISH, product.getType());
-        assertEquals(Station.COLD_KITCHEN, product.getType().getStation());
+        assertEquals(ProductType.BAKERY_ITEM, product.getType());
+        assertEquals(Station.BAKERY, product.getType().getStation());
     }
 
     // ==================== VALIDATION TESTS - NAME ====================
@@ -110,7 +110,7 @@ class ProductTest {
     void shouldThrowExceptionWhenNameIsNull() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new Product(null, "Description", ProductType.DRINK, 
+            () -> new Product(null, "Description", ProductType.BEVERAGE, 
                 new Price(new BigDecimal("2.50")), 180)
         );
 
@@ -122,7 +122,7 @@ class ProductTest {
     void shouldThrowExceptionWhenNameIsEmpty() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new Product("", "Description", ProductType.DRINK, 
+            () -> new Product("", "Description", ProductType.BEVERAGE, 
                 new Price(new BigDecimal("2.50")), 180)
         );
 
@@ -134,7 +134,7 @@ class ProductTest {
     void shouldThrowExceptionWhenNameIsBlank() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new Product("   ", "Description", ProductType.DRINK, 
+            () -> new Product("   ", "Description", ProductType.BEVERAGE, 
                 new Price(new BigDecimal("2.50")), 180)
         );
 
@@ -148,7 +148,7 @@ class ProductTest {
     void shouldThrowExceptionWhenDescriptionIsNull() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new Product("Product", null, ProductType.DRINK, 
+            () -> new Product("Product", null, ProductType.BEVERAGE, 
                 new Price(new BigDecimal("2.50")), 180)
         );
 
@@ -176,7 +176,7 @@ class ProductTest {
     void shouldThrowExceptionWhenPriceIsNull() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new Product("Product", "Description", ProductType.DRINK, null, 180)
+            () -> new Product("Product", "Description", ProductType.BEVERAGE, null, 180)
         );
 
         assertEquals("Product price cannot be null", exception.getMessage());
@@ -189,7 +189,7 @@ class ProductTest {
     void shouldThrowExceptionWhenPreparationTimeIsZero() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new Product("Product", "Description", ProductType.DRINK, 
+            () -> new Product("Product", "Description", ProductType.BEVERAGE, 
                 new Price(new BigDecimal("2.50")), 0)
         );
 
@@ -201,7 +201,7 @@ class ProductTest {
     void shouldThrowExceptionWhenPreparationTimeIsNegative() {
         IllegalArgumentException exception = assertThrows(
             IllegalArgumentException.class,
-            () -> new Product("Product", "Description", ProductType.DRINK, 
+            () -> new Product("Product", "Description", ProductType.BEVERAGE, 
                 new Price(new BigDecimal("2.50")), -10)
         );
 
@@ -214,7 +214,7 @@ class ProductTest {
         Product product = new Product(
             "Water",
             "Bottled water",
-            ProductType.DRINK,
+            ProductType.BEVERAGE,
             new Price(new BigDecimal("1.00")),
             1
         );
@@ -279,7 +279,7 @@ class ProductTest {
         Product product = new Product(
             longName,
             "Description",
-            ProductType.DRINK,
+            ProductType.BEVERAGE,
             new Price(new BigDecimal("2.50")),
             180
         );
@@ -295,7 +295,7 @@ class ProductTest {
         Product product = new Product(
             "Slow Roast",
             "Takes a long time",
-            ProductType.HOT_DISH,
+            ProductType.DESSERT,
             new Price(new BigDecimal("25.00")),
             largeTime
         );
@@ -310,7 +310,7 @@ class ProductTest {
         Product product = new Product(
             "Product",
             "Description",
-            ProductType.DRINK,
+            ProductType.BEVERAGE,
             originalPrice,
             180
         );
@@ -325,7 +325,7 @@ class ProductTest {
         return new Product(
             "Test Product",
             "Test Description",
-            ProductType.DRINK,
+            ProductType.BEVERAGE,
             new Price(new BigDecimal("5.00")),
             300
         );

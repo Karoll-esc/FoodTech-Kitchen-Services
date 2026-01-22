@@ -8,7 +8,8 @@ public class Task {
     private final Long id;
     private final Long orderId;
     private final Station station;
-    private final String tableNumber;
+    private final String ticketNumber;
+    private final String customerName;
     private final List<Product> products;
     private final LocalDateTime createdAt;
     private TaskStatus status;
@@ -16,13 +17,14 @@ public class Task {
     private LocalDateTime completedAt;
 
     // Constructor público para CREAR nuevas tasks (sin ID)
-    public Task(Long orderId, Station station, String tableNumber,
+    public Task(Long orderId, Station station, String ticketNumber, String customerName,
                 List<Product> products, LocalDateTime createdAt) {
-        validate(orderId, station, tableNumber, products, createdAt);
+        validate(orderId, station, ticketNumber, customerName, products, createdAt);
         this.id = null;
         this.orderId = orderId;
         this.station = station;
-        this.tableNumber = tableNumber;
+        this.ticketNumber = ticketNumber;
+        this.customerName = customerName;
         this.products = new ArrayList<>(products);
         this.createdAt = createdAt;
         this.status = TaskStatus.PENDING;
@@ -31,13 +33,14 @@ public class Task {
     }
 
     // Constructor PRIVADO con ID (para reconstrucción)
-    private Task(Long id, Long orderId, Station station, String tableNumber,
+    private Task(Long id, Long orderId, Station station, String ticketNumber, String customerName,
                  List<Product> products, LocalDateTime createdAt) {
-        validate(orderId, station, tableNumber, products, createdAt);
+        validate(orderId, station, ticketNumber, customerName, products, createdAt);
         this.id = id;
         this.orderId = orderId;
         this.station = station;
-        this.tableNumber = tableNumber;
+        this.ticketNumber = ticketNumber;
+        this.customerName = customerName;
         this.products = new ArrayList<>(products);
         this.createdAt = createdAt;
         this.status = TaskStatus.PENDING;
@@ -46,12 +49,12 @@ public class Task {
     }
 
 
-    public static Task reconstruct(Long id, Long orderId, Station station, String tableNumber,
-                                   List<Product> products, LocalDateTime createdAt,
-                                   TaskStatus status, LocalDateTime startedAt,
-                                   LocalDateTime completedAt) {
+    public static Task reconstruct(Long id, Long orderId, Station station, String ticketNumber, String customerName,
+                                    List<Product> products, LocalDateTime createdAt,
+                                    TaskStatus status, LocalDateTime startedAt,
+                                    LocalDateTime completedAt) {
         validateId(id);
-        Task task = new Task(id, orderId, station, tableNumber, products, createdAt);
+        Task task = new Task(id, orderId, station, ticketNumber, customerName, products, createdAt);
         task.status = status;
         task.startedAt = startedAt;
         task.completedAt = completedAt;
@@ -64,7 +67,8 @@ public class Task {
         }
     }
 
-    private void validate( Long orderId, Station station, String tableNumber, List<Product> products, LocalDateTime createdAt) {
+    private void validate(Long orderId, Station station, String ticketNumber, String customerName,
+                          List<Product> products, LocalDateTime createdAt) {
 
         if (orderId == null) {
             throw new IllegalArgumentException("Order ID cannot be null");
@@ -72,8 +76,11 @@ public class Task {
         if (station == null) {
             throw new IllegalArgumentException("Station cannot be null");
         }
-        if (tableNumber == null || tableNumber.trim().isEmpty()) {
-            throw new IllegalArgumentException("Table number cannot be null or empty");
+        if (ticketNumber == null || ticketNumber.trim().isEmpty()) {
+            throw new IllegalArgumentException("Ticket number cannot be null or empty");
+        }
+        if (customerName == null || customerName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer name cannot be null or empty");
         }
         if (products == null || products.isEmpty()) {
             throw new IllegalArgumentException("Products list cannot be null or empty");
@@ -112,8 +119,12 @@ public class Task {
         return station;
     }
 
-    public String getTableNumber() {
-        return tableNumber;
+    public String getTicketNumber() {
+        return ticketNumber;
+    }
+
+    public String getCustomerName() {
+        return customerName;
     }
 
     public List<Product> getProducts() {
