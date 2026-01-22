@@ -14,14 +14,14 @@ class TaskEntityTest {
         // Given & When
         TaskEntity entity = TaskEntity.builder()
             .orderId(1L)
-            .station(Station.BAR)
+            .station(Station.ESPRESSO_BAR)
             .tableNumber("A1")
             .build();
 
         // Then
         assertNotNull(entity);
         assertEquals(1L, entity.getOrderId());
-        assertEquals(Station.BAR, entity.getStation());
+        assertEquals(Station.ESPRESSO_BAR, entity.getStation());
         assertEquals("A1", entity.getTableNumber());
     }
 

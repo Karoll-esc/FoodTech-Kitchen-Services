@@ -13,9 +13,9 @@ import java.util.Set;
  * while administrators have access to all stations.
  * 
  * Business Rules:
- * - Bar staff (update:tasks:bar) can ONLY update BAR station tasks
- * - Hot kitchen staff (update:tasks:hot-kitchen) can ONLY update HOT_KITCHEN station tasks
- * - Cold kitchen staff (update:tasks:cold-kitchen) can ONLY update COLD_KITCHEN station tasks
+ * - Bar staff (update:tasks:bar) can ONLY update ESPRESSO_BAR station tasks
+ * - Hot kitchen staff (update:tasks:hot-kitchen) can ONLY update PASTRY_STATION station tasks
+ * - Cold kitchen staff (update:tasks:cold-kitchen) can ONLY update SANDWICH_STATION station tasks
  * - Admin (admin:all) can update ANY station tasks
  * 
  * Architecture Notes:
@@ -27,7 +27,7 @@ import java.util.Set;
  * Usage Example:
  * {@code
  * Set<String> userPermissions = securityHelper.getCurrentUserPermissions();
- * authService.validateUserCanUpdateTaskAtStation(userPermissions, Station.BAR);
+ * authService.validateUserCanUpdateTaskAtStation(userPermissions, Station.ESPRESSO_BAR);
  * // If execution reaches here, user is authorized
  * }
  */
@@ -73,9 +73,9 @@ public class StationAuthorizationService {
      */
     private String getRequiredPermissionForStation(Station station) {
         return switch (station) {
-            case BAR -> Permissions.UPDATE_TASKS_BAR;
-            case HOT_KITCHEN -> Permissions.UPDATE_TASKS_HOT_KITCHEN;
-            case COLD_KITCHEN -> Permissions.UPDATE_TASKS_COLD_KITCHEN;
+            case ESPRESSO_BAR -> Permissions.UPDATE_TASKS_BAR;
+            case PASTRY_STATION -> Permissions.UPDATE_TASKS_PASTRY_STATION;
+            case SANDWICH_STATION -> Permissions.UPDATE_TASKS_SANDWICH_STATION;
         };
     }
 }

@@ -39,7 +39,7 @@ class GetProductByIdUseCaseTest {
         Product expectedProduct = new Product(
             "Hamburguesa Clásica",
             "Hamburguesa de carne con lechuga y tomate",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("15.50")),
             300
         );
@@ -54,7 +54,7 @@ class GetProductByIdUseCaseTest {
         assertNotNull(result);
         assertEquals(productId, result.getId());
         assertEquals("Hamburguesa Clásica", result.getName());
-        assertEquals(ProductType.HOT_DISH, result.getType());
+        assertEquals(ProductType.PASTRY, result.getType());
         verify(productRepository, times(1)).findById(productId);
     }
 
@@ -97,7 +97,7 @@ class GetProductByIdUseCaseTest {
         Product product = new Product(
             "Ensalada César",
             "Ensalada con pollo y aderezo césar",
-            ProductType.COLD_DISH,
+            ProductType.SANDWICH,
             new Price(new BigDecimal("12.00")),
             180
         );
@@ -113,7 +113,7 @@ class GetProductByIdUseCaseTest {
         assertEquals(productId, result.getId());
         assertEquals("Ensalada César", result.getName());
         assertEquals("Ensalada con pollo y aderezo césar", result.getDescription());
-        assertEquals(ProductType.COLD_DISH, result.getType());
+        assertEquals(ProductType.SANDWICH, result.getType());
         assertEquals(new BigDecimal("12.00"), result.getPrice().getAmount());
         assertEquals(180, result.getPreparationTimeSeconds());
         assertFalse(result.isAvailable());

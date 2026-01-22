@@ -92,7 +92,7 @@ class UpdateProductAvailabilityUseCaseTest {
             productId,
             "Pizza Margherita",
             "Pizza con tomate y mozzarella",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("12.50")),
             15,
             true  // Initially available
@@ -120,7 +120,7 @@ class UpdateProductAvailabilityUseCaseTest {
         assertEquals(productId, updatedProduct.getId());
         assertEquals("Pizza Margherita", updatedProduct.getName());
         assertEquals("Pizza con tomate y mozzarella", updatedProduct.getDescription());
-        assertEquals(ProductType.HOT_DISH, updatedProduct.getType());
+        assertEquals(ProductType.PASTRY, updatedProduct.getType());
         assertEquals(new BigDecimal("12.50"), updatedProduct.getPrice().getAmount());
         assertEquals(15, updatedProduct.getPreparationTime());
         
@@ -137,7 +137,7 @@ class UpdateProductAvailabilityUseCaseTest {
             productId,
             "Ensalada César",
             "Ensalada fresca",
-            ProductType.COLD_DISH,
+            ProductType.SANDWICH,
             new Price(new BigDecimal("8.00")),
             10,
             true  // Already available
@@ -188,7 +188,7 @@ class UpdateProductAvailabilityUseCaseTest {
         Long productId = 4L;
         String originalName = "Hamburguesa Clásica";
         String originalDescription = "Hamburguesa con queso";
-        ProductType originalType = ProductType.HOT_DISH;
+        ProductType originalType = ProductType.PASTRY;
         Price originalPrice = new Price(new BigDecimal("10.99"));
         Integer originalPreparationTime = 12;
         LocalDateTime originalCreatedAt = LocalDateTime.now().minusDays(30);

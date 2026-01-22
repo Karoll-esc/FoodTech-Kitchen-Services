@@ -15,7 +15,7 @@ class TaskTest {
         Product product = new Product("Cerveza", ProductType.DRINK);
         Task task = new Task(
                 1L,
-                Station.BAR,
+                Station.ESPRESSO_BAR,
                 "A1",
                 List.of(product),
                 LocalDateTime.now()
@@ -35,7 +35,7 @@ class TaskTest {
         Product product = new Product("Cerveza", ProductType.DRINK);
         Task task = new Task(
                 1L,
-                Station.BAR,
+                Station.ESPRESSO_BAR,
                 "A1",
                 List.of(product),
                 LocalDateTime.now()
@@ -56,7 +56,7 @@ class TaskTest {
         Product product = new Product("Cerveza", ProductType.DRINK);
         Task task = new Task(
                 1L,
-                Station.BAR,
+                Station.ESPRESSO_BAR,
                 "A1",
                 List.of(product),
                 LocalDateTime.now()

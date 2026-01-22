@@ -56,7 +56,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         Map<String, Object> request = Map.of(
             "name", "Pizza Margherita",
             "description", "Pizza clásica con tomate y mozzarella",
-            "type", "HOT_DISH",
+            "type", "PASTRY",
             "price", "12.99",
             "preparationTimeSeconds", 900
         );
@@ -69,7 +69,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
             .andExpect(jsonPath("$.id").exists())
             .andExpect(jsonPath("$.name").value("Pizza Margherita"))
             .andExpect(jsonPath("$.description").value("Pizza clásica con tomate y mozzarella"))
-            .andExpect(jsonPath("$.type").value("HOT_DISH"))
+            .andExpect(jsonPath("$.type").value("PASTRY"))
             .andExpect(jsonPath("$.price").value(12.99))
             .andExpect(jsonPath("$.preparationTimeSeconds").value(900))
             .andExpect(jsonPath("$.available").value(true))
@@ -183,7 +183,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         Map<String, Object> createRequest = Map.of(
             "name", "Hamburguesa Clásica",
             "description", "Hamburguesa con queso",
-            "type", "HOT_DISH",
+            "type", "PASTRY",
             "price", "8.99",
             "preparationTimeSeconds", 600
         );
@@ -204,7 +204,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
             .andExpect(jsonPath("$.id").value(productId))
             .andExpect(jsonPath("$.name").value("Hamburguesa Clásica"))
             .andExpect(jsonPath("$.description").value("Hamburguesa con queso"))
-            .andExpect(jsonPath("$.type").value("HOT_DISH"))
+            .andExpect(jsonPath("$.type").value("PASTRY"))
             .andExpect(jsonPath("$.price").value(8.99));
     }
 
@@ -237,7 +237,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         Map<String, Object> product2 = Map.of(
             "name", "Ensalada César",
             "description", "Ensalada fresca",
-            "type", "COLD_DISH",
+            "type", "SANDWICH",
             "price", "6.50",
             "preparationTimeSeconds", 300
         );
@@ -300,7 +300,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         Map<String, Object> hotDish = Map.of(
             "name", "Sopa de Pollo",
             "description", "Sopa caliente",
-            "type", "HOT_DISH",
+            "type", "PASTRY",
             "price", "5.00",
             "preparationTimeSeconds", 900
         );
@@ -333,7 +333,7 @@ class ProductControllerIntegrationTest extends BaseIntegrationTest {
         Map<String, Object> createRequest = Map.of(
             "name", "Pizza Original",
             "description", "Pizza básica",
-            "type", "HOT_DISH",
+            "type", "PASTRY",
             "price", "10.00",
             "preparationTimeSeconds", 600
         );

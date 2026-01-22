@@ -30,7 +30,7 @@ import com.foodtech.kitchen.domain.model.Product;
  *   <li><b>id:</b> Database primary key</li>
  *   <li><b>name:</b> Product name</li>
  *   <li><b>description:</b> Product description</li>
- *   <li><b>type:</b> Product category (DRINK, HOT_DISH, COLD_DISH)</li>
+ *   <li><b>type:</b> Product category (DRINK, PASTRY, SANDWICH)</li>
  *   <li><b>price:</b> Product price</li>
  *   <li><b>preparationTime:</b> Preparation time in seconds</li>
  *   <li><b>createdAt:</b> Original creation timestamp</li>
@@ -59,7 +59,7 @@ import com.foodtech.kitchen.domain.model.Product;
  * }
  * 
  * // Example 4: Bulk disable products by type
- * List<Product> hotDishes = getProductsByType(ProductType.HOT_DISH);
+ * List<Product> hotDishes = getProductsByType(ProductType.PASTRY);
  * for (Product product : hotDishes) {
  *     if (kitchenClosed) {
  *         useCase.execute(product.getId(), false);

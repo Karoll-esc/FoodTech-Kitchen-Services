@@ -43,7 +43,7 @@ class CreateProductUseCaseTest {
         Product inputProduct = new Product(
             "Hamburguesa Clásica",
             "Hamburguesa de carne con lechuga y tomate",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("15.50")),
             300
         );
@@ -51,7 +51,7 @@ class CreateProductUseCaseTest {
         Product savedProduct = new Product(
             "Hamburguesa Clásica",
             "Hamburguesa de carne con lechuga y tomate",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("15.50")),
             300
         );
@@ -133,7 +133,7 @@ class CreateProductUseCaseTest {
         Product product = new Product(
             "Ensalada César",
             "Ensalada con pollo y aderezo césar",
-            ProductType.COLD_DISH,
+            ProductType.SANDWICH,
             new Price(new BigDecimal("12.00")),
             180
         );
@@ -141,7 +141,7 @@ class CreateProductUseCaseTest {
         Product savedProduct = new Product(
             "Ensalada César",
             "Ensalada con pollo y aderezo césar",
-            ProductType.COLD_DISH,
+            ProductType.SANDWICH,
             new Price(new BigDecimal("12.00")),
             180
         );

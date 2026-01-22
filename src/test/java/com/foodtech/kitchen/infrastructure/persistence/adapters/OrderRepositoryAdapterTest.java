@@ -33,7 +33,7 @@ class OrderRepositoryAdapterTest {
     void shouldSaveOrder() {
         // Given
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Product pizza = new Product("Pizza", ProductType.PASTRY);
         Order order = new Order("A1", List.of(cocaCola, pizza));
 
         com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p1 =
@@ -41,7 +41,7 @@ class OrderRepositoryAdapterTest {
                 .name("Coca Cola").type(ProductType.DRINK).build();
         com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p2 =
             com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                .name("Pizza").type(ProductType.HOT_DISH).build();
+                .name("Pizza").type(ProductType.PASTRY).build();
 
         OrderEntity savedEntity = OrderEntity.builder()
             .id(1L)
@@ -90,7 +90,7 @@ class OrderRepositoryAdapterTest {
         // Given
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
         Product sprite = new Product("Sprite", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Product pizza = new Product("Pizza", ProductType.PASTRY);
         Order order = new Order("C3", List.of(cocaCola, sprite, pizza));
 
         OrderEntity savedEntity = OrderEntity.builder()
@@ -102,7 +102,7 @@ class OrderRepositoryAdapterTest {
                 com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
                     .name("Sprite").type(ProductType.DRINK).build(),
                 com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                    .name("Pizza").type(ProductType.HOT_DISH).build()))
+                    .name("Pizza").type(ProductType.PASTRY).build()))
             .build();
         
         when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);

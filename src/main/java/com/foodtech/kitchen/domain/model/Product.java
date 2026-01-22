@@ -47,7 +47,7 @@ import java.time.LocalDateTime;
  * Product pizza = new Product(
  *     "Pizza Margherita",
  *     "Pizza con tomate, mozzarella y albahaca",
- *     ProductType.HOT_DISH,
+ *     ProductType.PASTRY,
  *     price,
  *     900 // 15 minutos
  * );
@@ -89,7 +89,7 @@ public class Product {
      * 
      * @param name el nombre del producto (único, no vacío)
      * @param description descripción del producto (no null, puede estar vacía)
-     * @param type tipo de producto (DRINK, HOT_DISH, COLD_DISH)
+     * @param type tipo de producto (DRINK, PASTRY, SANDWICH)
      * @param price precio del producto (>= 0)
      * @param preparationTimeSeconds tiempo de preparación en segundos (> 0)
      * @throws IllegalArgumentException si algún parámetro no cumple las validaciones
@@ -266,7 +266,7 @@ public class Product {
     /**
      * Obtiene el tipo de producto.
      * 
-     * @return el tipo (DRINK, HOT_DISH, COLD_DISH)
+     * @return el tipo (DRINK, PASTRY, SANDWICH)
      */
     public ProductType getType() {
         return type;

@@ -52,7 +52,7 @@ class OrderControllerIntegrationTest extends BaseIntegrationTest {
             "tableNumber", "B2",
             "products", List.of(
                 Map.of("name", "Coca Cola", "type", "DRINK"),
-                Map.of("name", "Pizza", "type", "HOT_DISH")
+                Map.of("name", "Pizza", "type", "PASTRY")
             )
         );
 

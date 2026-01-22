@@ -43,7 +43,7 @@ import com.foodtech.kitchen.domain.services.ProductValidator;
  * Product newProduct = new Product(
  *     "Hamburguesa Clásica",
  *     "Hamburguesa de carne con lechuga y tomate",
- *     ProductType.HOT_DISH,
+ *     ProductType.PASTRY,
  *     new Price(new BigDecimal("15.50")),
  *     300
  * );

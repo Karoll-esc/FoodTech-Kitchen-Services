@@ -1,6 +1,5 @@
 package com.foodtech.kitchen.application.usecases;
 
-import com.foodtech.kitchen.application.ports.out.CommandExecutor;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.domain.model.Station;
 import com.foodtech.kitchen.domain.model.Product;
@@ -49,7 +48,7 @@ class StartTaskPreparationUseCaseTest {
         Task pendingTask = Task.reconstruct(
                 taskId,
                 1L,
-                Station.BAR,
+                Station.ESPRESSO_BAR,
                 "A1",
                 List.of(product),
                 LocalDateTime.now(),

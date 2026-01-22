@@ -8,28 +8,28 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PrepareColdDishCommandTest {
+class PrepareSandwichCommandTest {
 
     @Test
     @DisplayName("Debe crear comando de plato frío con estación correcta")
     void shouldCreateColdDishCommandWithCorrectStation() {
         // Given
-        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH);
+        Product salad = new Product("Caesar Salad", ProductType.SANDWICH);
         List<Product> products = List.of(salad);
 
         // When
-        PrepareColdDishCommand command = new PrepareColdDishCommand(products);
+        PrepareSandwichCommand command = new PrepareSandwichCommand(products);
 
         // Then
-        assertInstanceOf(PrepareColdDishCommand.class, command);
+        assertInstanceOf(PrepareSandwichCommand.class, command);
     }
 
     @Test
     @DisplayName("Debe ejecutar la preparación de plato frío")
     void shouldExecuteColdDishPreparation() {
         // Given
-        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH);
-        PrepareColdDishCommand command = new PrepareColdDishCommand(List.of(salad));
+        Product salad = new Product("Caesar Salad", ProductType.SANDWICH);
+        PrepareSandwichCommand command = new PrepareSandwichCommand(List.of(salad));
 
         // When & Then
         assertDoesNotThrow(() -> command.execute());

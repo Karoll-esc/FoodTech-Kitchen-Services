@@ -89,7 +89,7 @@ public interface ProductRepository {
     /**
      * Finds products filtered by product type.
      *
-     * @param type the product type (DRINK, HOT_DISH, COLD_DISH)
+     * @param type the product type (DRINK, PASTRY, SANDWICH)
      * @return list of products of the specified type (empty list if none found)
      * @throws IllegalArgumentException if type is null
      */
