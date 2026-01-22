@@ -198,7 +198,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
     /**
      * Busca productos por su tipo.
      * 
-     * @param type el tipo de producto (DRINK, HOT_DISH, COLD_DISH)
+     * @param type el tipo de producto (DRINK, PASTRY, SANDWICH)
      * @return lista de productos del tipo especificado (puede estar vacía)
      */
     @Override

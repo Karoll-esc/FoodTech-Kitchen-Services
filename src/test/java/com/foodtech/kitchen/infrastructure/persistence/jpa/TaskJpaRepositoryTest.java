@@ -31,7 +31,7 @@ class TaskJpaRepositoryTest {
 
         TaskEntity task = TaskEntity.builder()
             .orderId(1L)
-            .station(Station.BAR)
+            .station(Station.ESPRESSO_BAR)
             .tableNumber("A1")
             .products(List.of(p))
             .build();
@@ -42,7 +42,7 @@ class TaskJpaRepositoryTest {
 
         // Then
         assertNotNull(found);
-        assertEquals(Station.BAR, found.getStation());
+        assertEquals(Station.ESPRESSO_BAR, found.getStation());
         assertEquals("A1", found.getTableNumber());
     }
 
@@ -52,14 +52,14 @@ class TaskJpaRepositoryTest {
         // Given
         TaskEntity barTask = TaskEntity.builder()
             .orderId(1L)
-            .station(Station.BAR)
+            .station(Station.ESPRESSO_BAR)
             .tableNumber("A1")
             .products(List.of())
             .build();
         
         TaskEntity kitchenTask = TaskEntity.builder()
             .orderId(1L)
-            .station(Station.HOT_KITCHEN)
+            .station(Station.PASTRY_STATION)
             .tableNumber("B2")
             .products(List.of())
             .build();
@@ -68,10 +68,10 @@ class TaskJpaRepositoryTest {
         repository.save(kitchenTask);
 
         // When
-        List<TaskEntity> barTasks = repository.findByStation(Station.BAR);
+        List<TaskEntity> barTasks = repository.findByStation(Station.ESPRESSO_BAR);
 
         // Then
         assertEquals(1, barTasks.size());
-        assertEquals(Station.BAR, barTasks.get(0).getStation());
+        assertEquals(Station.ESPRESSO_BAR, barTasks.get(0).getStation());
     }
 }

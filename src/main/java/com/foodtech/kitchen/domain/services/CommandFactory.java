@@ -10,9 +10,9 @@ public class CommandFactory {
 
     public Command createCommand(Station station, List<Product> products) {
         return switch (station) {
-            case BAR -> new PrepareDrinkCommand(products);
-            case HOT_KITCHEN -> new PrepareHotDishCommand(products);
-            case COLD_KITCHEN -> new PrepareColdDishCommand(products);
+            case ESPRESSO_BAR -> new PrepareDrinkCommand(products);
+            case PASTRY_STATION -> new PreparePastryCommand(products);
+            case SANDWICH_STATION -> new PrepareSandwichCommand(products);
         };
     }
 

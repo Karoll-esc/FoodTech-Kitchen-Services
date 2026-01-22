@@ -33,7 +33,7 @@ class TaskRepositoryAdapterTest {
     void shouldSaveTasks() {
         // Given
         Product product = new Product("Coca Cola", ProductType.DRINK);
-        Task task = new Task(1L, Station.BAR, "A1", List.of(product), LocalDateTime.now());
+        Task task = new Task(1L, Station.ESPRESSO_BAR, "A1", List.of(product), LocalDateTime.now());
 
         // When
         adapter.saveAll(List.of(task));
@@ -53,22 +53,22 @@ class TaskRepositoryAdapterTest {
         TaskEntity entity = TaskEntity.builder()
             .id(1L)
             .orderId(1L)
-            .station(Station.BAR)
+            .station(Station.ESPRESSO_BAR)
             .tableNumber("A1")
             .products(List.of(p))
             .createdAt(LocalDateTime.now())
             .build();
         
-        when(jpaRepository.findByStation(Station.BAR))
+        when(jpaRepository.findByStation(Station.ESPRESSO_BAR))
             .thenReturn(List.of(entity));
 
         // When
-        List<Task> tasks = adapter.findByStation(Station.BAR);
+        List<Task> tasks = adapter.findByStation(Station.ESPRESSO_BAR);
 
         // Then
         assertEquals(1, tasks.size());
-        assertEquals(Station.BAR, tasks.get(0).getStation());
-        verify(jpaRepository, times(1)).findByStation(Station.BAR);
+        assertEquals(Station.ESPRESSO_BAR, tasks.get(0).getStation());
+        verify(jpaRepository, times(1)).findByStation(Station.ESPRESSO_BAR);
     }
 
     @Test
@@ -82,7 +82,7 @@ class TaskRepositoryAdapterTest {
         TaskEntity entity = TaskEntity.builder()
             .id(1L)
             .orderId(1L)
-            .station(Station.BAR)
+            .station(Station.ESPRESSO_BAR)
             .tableNumber("A1")
             .products(List.of(p))
             .createdAt(LocalDateTime.now())
@@ -109,7 +109,7 @@ class TaskRepositoryAdapterTest {
         TaskEntity completedEntity = TaskEntity.builder()
             .id(1L)
             .orderId(1L)
-            .station(Station.BAR)
+            .station(Station.ESPRESSO_BAR)
             .tableNumber("A1")
             .products(List.of(p))
             .status(TaskStatus.COMPLETED)
@@ -118,16 +118,16 @@ class TaskRepositoryAdapterTest {
             .completedAt(LocalDateTime.now())
             .build();
         
-        when(jpaRepository.findByStationAndStatus(Station.BAR, TaskStatus.COMPLETED))
+        when(jpaRepository.findByStationAndStatus(Station.ESPRESSO_BAR, TaskStatus.COMPLETED))
             .thenReturn(List.of(completedEntity));
 
         // When
-        List<Task> tasks = adapter.findByStationAndStatus(Station.BAR, TaskStatus.COMPLETED);
+        List<Task> tasks = adapter.findByStationAndStatus(Station.ESPRESSO_BAR, TaskStatus.COMPLETED);
 
         // Then
         assertEquals(1, tasks.size());
-        assertEquals(Station.BAR, tasks.get(0).getStation());
+        assertEquals(Station.ESPRESSO_BAR, tasks.get(0).getStation());
         assertEquals(TaskStatus.COMPLETED, tasks.get(0).getStatus());
-        verify(jpaRepository, times(1)).findByStationAndStatus(Station.BAR, TaskStatus.COMPLETED);
+        verify(jpaRepository, times(1)).findByStationAndStatus(Station.ESPRESSO_BAR, TaskStatus.COMPLETED);
     }
 }

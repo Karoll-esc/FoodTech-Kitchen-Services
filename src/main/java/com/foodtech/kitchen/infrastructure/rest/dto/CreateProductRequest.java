@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  * 
  * @param name product name (unique, not blank)
  * @param description product description (not null, can be empty)
- * @param type product type (DRINK, HOT_DISH, COLD_DISH)
+ * @param type product type (DRINK, PASTRY, SANDWICH)
  * @param price product price (>= 0, 2 decimals)
  * @param preparationTimeSeconds preparation time in seconds (> 0)
  */

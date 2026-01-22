@@ -27,38 +27,38 @@ class CommandFactoryTest {
         List<Product> products = List.of(cocaCola);
 
         // When
-        Command command = factory.createCommand(Station.BAR, products);
+        Command command = factory.createCommand(Station.ESPRESSO_BAR, products);
 
         // Then
         assertInstanceOf(PrepareDrinkCommand.class, command);
     }
 
     @Test
-    @DisplayName("Debe crear PrepareHotDishCommand para productos de tipo HOT_DISH")
+    @DisplayName("Debe crear PreparePastryCommand para productos de tipo PASTRY")
     void shouldCreateHotDishCommandForHotDishProducts() {
         // Given
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Product pizza = new Product("Pizza", ProductType.PASTRY);
         List<Product> products = List.of(pizza);
 
         // When
-        Command command = factory.createCommand(Station.HOT_KITCHEN, products);
+        Command command = factory.createCommand(Station.PASTRY_STATION, products);
 
         // Then
-        assertInstanceOf(PrepareHotDishCommand.class, command);
+        assertInstanceOf(PreparePastryCommand.class, command);
     }
 
     @Test
-    @DisplayName("Debe crear PrepareColdDishCommand para productos de tipo COLD_DISH")
+    @DisplayName("Debe crear PrepareSandwichCommand para productos de tipo SANDWICH")
     void shouldCreateColdDishCommandForColdDishProducts() {
         // Given
-        Product salad = new Product("Caesar Salad", ProductType.COLD_DISH);
+        Product salad = new Product("Caesar Salad", ProductType.SANDWICH);
         List<Product> products = List.of(salad);
 
         // When
-        Command command = factory.createCommand(Station.COLD_KITCHEN, products);
+        Command command = factory.createCommand(Station.SANDWICH_STATION, products);
 
         // Then
-        assertInstanceOf(PrepareColdDishCommand.class, command);
+        assertInstanceOf(PrepareSandwichCommand.class, command);
     }
 
     @Test
@@ -70,6 +70,6 @@ class CommandFactoryTest {
 
         // When & Then
         // Este test es solo por completitud, pero con enum no puede pasar
-        assertDoesNotThrow(() -> factory.createCommand(Station.BAR, products));
+        assertDoesNotThrow(() -> factory.createCommand(Station.ESPRESSO_BAR, products));
     }
 }

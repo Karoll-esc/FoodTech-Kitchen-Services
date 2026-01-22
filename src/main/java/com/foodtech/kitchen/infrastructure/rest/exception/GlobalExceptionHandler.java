@@ -147,17 +147,17 @@ public class GlobalExceptionHandler {
      * attempts to modify tasks assigned to a station they're not authorized for. The FoodTech
      * Kitchen system enforces strict station-based access control:</p>
      * <ul>
-     *   <li><strong>Bar Staff:</strong> Can only update BAR station tasks (requires {@code update:tasks:bar})</li>
-     *   <li><strong>Hot Kitchen Staff:</strong> Can only update HOT_KITCHEN station tasks (requires {@code update:tasks:hot-kitchen})</li>
-     *   <li><strong>Cold Kitchen Staff:</strong> Can only update COLD_KITCHEN station tasks (requires {@code update:tasks:cold-kitchen})</li>
+     *   <li><strong>Bar Staff:</strong> Can only update ESPRESSO_BAR station tasks (requires {@code update:tasks:bar})</li>
+     *   <li><strong>Hot Kitchen Staff:</strong> Can only update PASTRY_STATION station tasks (requires {@code update:tasks:hot-kitchen})</li>
+     *   <li><strong>Cold Kitchen Staff:</strong> Can only update SANDWICH_STATION station tasks (requires {@code update:tasks:cold-kitchen})</li>
      *   <li><strong>Admin:</strong> Can update ALL station tasks (has {@code admin:all} permission)</li>
      * </ul>
      * 
      * <p><strong>Common Scenarios:</strong></p>
      * <ul>
-     *   <li>Bar staff trying to start a HOT_KITCHEN task → 403 Forbidden</li>
-     *   <li>Hot kitchen staff trying to complete a COLD_KITCHEN task → 403 Forbidden</li>
-     *   <li>Cold kitchen staff trying to update a BAR task → 403 Forbidden</li>
+     *   <li>Bar staff trying to start a PASTRY_STATION task → 403 Forbidden</li>
+     *   <li>Hot kitchen staff trying to complete a SANDWICH_STATION task → 403 Forbidden</li>
+     *   <li>Cold kitchen staff trying to update a ESPRESSO_BAR task → 403 Forbidden</li>
      * </ul>
      * 
      * <p><strong>HTTP Response Example:</strong></p>
@@ -165,7 +165,7 @@ public class GlobalExceptionHandler {
      * Status: 403 Forbidden
      * Body: {
      *   "error": "Forbidden",
-     *   "message": "User is not authorized to update tasks at station: HOT_KITCHEN. 
+     *   "message": "User is not authorized to update tasks at station: PASTRY_STATION.
      *               User permissions: update:tasks:bar, read:tasks. 
      *               Required permission: update:tasks:hot-kitchen or admin:all",
      *   "status": 403
@@ -361,7 +361,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-        String message = String.format("Invalid value '%s' for parameter '%s'. Expected one of: BAR, HOT_KITCHEN, COLD_KITCHEN", 
+        String message = String.format("Invalid value '%s' for parameter '%s'. Expected one of: ESPRESSO_BAR, PASTRY_STATION, SANDWICH_STATION",
             ex.getValue(), ex.getName());
         ErrorResponse error = new ErrorResponse(
             message,

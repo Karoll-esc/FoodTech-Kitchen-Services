@@ -36,9 +36,9 @@ class GetProductsUseCaseTest {
     @DisplayName("Debe retornar todos los productos cuando no hay filtros")
     void shouldReturnAllProductsWhenNoFiltersApplied() {
         // Given
-        Product product1 = createProduct(1L, "Hamburguesa", ProductType.HOT_DISH, true);
+        Product product1 = createProduct(1L, "Hamburguesa", ProductType.PASTRY, true);
         Product product2 = createProduct(2L, "Coca Cola", ProductType.DRINK, true);
-        Product product3 = createProduct(3L, "Ensalada", ProductType.COLD_DISH, false);
+        Product product3 = createProduct(3L, "Ensalada", ProductType.SANDWICH, false);
 
         List<Product> allProducts = Arrays.asList(product1, product2, product3);
         when(productRepository.findAll()).thenReturn(allProducts);
@@ -58,7 +58,7 @@ class GetProductsUseCaseTest {
     @DisplayName("Debe retornar solo productos disponibles cuando se filtra por disponibilidad")
     void shouldReturnOnlyAvailableProductsWhenFilteredByAvailability() {
         // Given
-        Product product1 = createProduct(1L, "Hamburguesa", ProductType.HOT_DISH, true);
+        Product product1 = createProduct(1L, "Hamburguesa", ProductType.PASTRY, true);
         Product product2 = createProduct(2L, "Coca Cola", ProductType.DRINK, true);
 
         List<Product> availableProducts = Arrays.asList(product1, product2);
@@ -80,7 +80,7 @@ class GetProductsUseCaseTest {
     @DisplayName("Debe retornar solo productos no disponibles cuando se filtra por no disponible")
     void shouldReturnOnlyUnavailableProductsWhenFilteredByUnavailable() {
         // Given
-        Product product = createProduct(3L, "Ensalada", ProductType.COLD_DISH, false);
+        Product product = createProduct(3L, "Ensalada", ProductType.SANDWICH, false);
 
         List<Product> unavailableProducts = Collections.singletonList(product);
         when(productRepository.findByAvailable(false)).thenReturn(unavailableProducts);
@@ -120,35 +120,35 @@ class GetProductsUseCaseTest {
     @DisplayName("Debe retornar productos filtrados por disponibilidad y tipo")
     void shouldReturnProductsFilteredByBothAvailabilityAndType() {
         // Given
-        Product product1 = createProduct(1L, "Hamburguesa", ProductType.HOT_DISH, true);
-        Product product2 = createProduct(2L, "Pizza", ProductType.HOT_DISH, true);
+        Product product1 = createProduct(1L, "Hamburguesa", ProductType.PASTRY, true);
+        Product product2 = createProduct(2L, "Pizza", ProductType.PASTRY, true);
 
         List<Product> allHotDishes = Arrays.asList(product1, product2);
-        when(productRepository.findByType(ProductType.HOT_DISH)).thenReturn(allHotDishes);
+        when(productRepository.findByType(ProductType.PASTRY)).thenReturn(allHotDishes);
 
         // When
-        List<Product> result = getProductsUseCase.execute(true, ProductType.HOT_DISH);
+        List<Product> result = getProductsUseCase.execute(true, ProductType.PASTRY);
 
         // Then
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(p -> p.getType() == ProductType.HOT_DISH && p.isAvailable()));
-        verify(productRepository, times(1)).findByType(ProductType.HOT_DISH);
+        assertTrue(result.stream().allMatch(p -> p.getType() == ProductType.PASTRY && p.isAvailable()));
+        verify(productRepository, times(1)).findByType(ProductType.PASTRY);
     }
 
     @Test
     @DisplayName("Debe retornar lista vacía cuando no hay productos que coincidan con los filtros")
     void shouldReturnEmptyListWhenNoProductsMatchFilters() {
         // Given
-        when(productRepository.findByType(ProductType.COLD_DISH)).thenReturn(Collections.emptyList());
+        when(productRepository.findByType(ProductType.SANDWICH)).thenReturn(Collections.emptyList());
 
         // When
-        List<Product> result = getProductsUseCase.execute(null, ProductType.COLD_DISH);
+        List<Product> result = getProductsUseCase.execute(null, ProductType.SANDWICH);
 
         // Then
         assertNotNull(result);
         assertTrue(result.isEmpty());
-        verify(productRepository, times(1)).findByType(ProductType.COLD_DISH);
+        verify(productRepository, times(1)).findByType(ProductType.SANDWICH);
     }
 
     @Test

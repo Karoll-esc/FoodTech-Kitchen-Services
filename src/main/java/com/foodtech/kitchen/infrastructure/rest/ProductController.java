@@ -204,7 +204,7 @@ public class ProductController {
      * <ul>
      *   <li>Product name must be unique (case-sensitive)</li>
      *   <li>Name cannot be null or blank</li>
-     *   <li>Type must be valid ProductType enum (DRINK, HOT_DISH, COLD_DISH)</li>
+     *   <li>Type must be valid ProductType enum (DRINK, PASTRY, SANDWICH)</li>
      *   <li>Price must be positive (> 0)</li>
      *   <li>Preparation time must be positive (> 0 seconds)</li>
      * </ul>
@@ -291,7 +291,7 @@ public class ProductController {
      * <p><strong>Query Parameters (optional):</strong></p>
      * <ul>
      *   <li><code>available</code> (Boolean) - Filter by availability status (true/false)</li>
-     *   <li><code>type</code> (String) - Filter by product type (DRINK, HOT_DISH, COLD_DISH)</li>
+     *   <li><code>type</code> (String) - Filter by product type (DRINK, PASTRY, SANDWICH)</li>
      * </ul>
      * 
      * <p><strong>Request Examples:</strong></p>
@@ -299,7 +299,7 @@ public class ProductController {
      *   <li>GET /api/products - All products</li>
      *   <li>GET /api/products?available=true - Only available products</li>
      *   <li>GET /api/products?type=DRINK - Only drinks</li>
-     *   <li>GET /api/products?available=true&type=HOT_DISH - Available hot dishes</li>
+     *   <li>GET /api/products?available=true&type=PASTRY - Available hot dishes</li>
      * </ul>
      * 
      * <p><strong>Response Example (200 OK):</strong></p>
@@ -316,7 +316,7 @@ public class ProductController {
      *   {
      *     "id": 2,
      *     "name": "Hamburger",
-     *     "type": "HOT_DISH",
+     *     "type": "PASTRY",
      *     "price": 8.50,
      *     "available": false,
      *     ...
@@ -327,7 +327,7 @@ public class ProductController {
      * <p><strong>HTTP Status Codes:</strong></p>
      * <ul>
      *   <li>200 OK - Products retrieved successfully (empty list if no matches)</li>
-     *   <li>400 Bad Request - Invalid type value (if not DRINK, HOT_DISH, or COLD_DISH)</li>
+     *   <li>400 Bad Request - Invalid type value (if not DRINK, PASTRY, or SANDWICH)</li>
      *   <li>401 Unauthorized - User not authenticated</li>
      * </ul>
      * 
@@ -336,7 +336,7 @@ public class ProductController {
      * <p><strong>Authorization:</strong> All authenticated users (admin, waiters, kitchen staff)</p>
      * 
      * @param available optional filter for product availability status (true/false/null for all)
-     * @param type optional filter for product type (DRINK/HOT_DISH/COLD_DISH, null for all)
+     * @param type optional filter for product type (DRINK/PASTRY/SANDWICH, null for all)
      * @return ResponseEntity with 200 status and list of matching products (empty if none match)
      * @throws IllegalArgumentException if type parameter is not a valid ProductType enum value (handled by Spring → 400)
      * @see GetProductsUseCase

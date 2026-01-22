@@ -21,7 +21,7 @@ class OrderMapperTest {
             "A1",
             List.of(
                 new ProductRequest("Coca Cola", "DRINK"),
-                new ProductRequest("Pizza", "HOT_DISH")
+                new ProductRequest("Pizza", "PASTRY")
             )
         );
 

@@ -39,7 +39,7 @@ class DeleteProductUseCaseTest {
         Product existingProduct = new Product(
             "Hamburguesa Clásica",
             "Hamburguesa de carne con lechuga y tomate",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("15.50")),
             300
         );
@@ -96,7 +96,7 @@ class DeleteProductUseCaseTest {
         Product product = new Product(
             "Ensalada César",
             "Ensalada con pollo y aderezo césar",
-            ProductType.COLD_DISH,
+            ProductType.SANDWICH,
             new Price(new BigDecimal("12.00")),
             180
         );

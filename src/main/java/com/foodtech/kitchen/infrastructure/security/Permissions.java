@@ -28,8 +28,8 @@ public final class Permissions {
     // Task permissions
     public static final String READ_TASKS = "read:tasks";
     public static final String UPDATE_TASKS_BAR = "update:tasks:bar";
-    public static final String UPDATE_TASKS_HOT_KITCHEN = "update:tasks:hot-kitchen";
-    public static final String UPDATE_TASKS_COLD_KITCHEN = "update:tasks:cold-kitchen";
+    public static final String UPDATE_TASKS_PASTRY_STATION = "update:tasks:pastry-station";
+    public static final String UPDATE_TASKS_SANDWICH_STATION = "update:tasks:sandwich-station";
 
     // Table permissions (HU-007)
     public static final String UPDATE_TABLES = "update:tables";
@@ -50,22 +50,22 @@ public final class Permissions {
      */
     public static boolean isTaskUpdatePermission(String permission) {
         return UPDATE_TASKS_BAR.equals(permission)
-            || UPDATE_TASKS_HOT_KITCHEN.equals(permission)
-            || UPDATE_TASKS_COLD_KITCHEN.equals(permission);
+            || UPDATE_TASKS_PASTRY_STATION.equals(permission)
+            || UPDATE_TASKS_SANDWICH_STATION.equals(permission);
     }
 
     /**
      * Gets the task update permission for a specific station.
      * 
-     * @param station The station name (BAR, HOT_KITCHEN, COLD_KITCHEN)
+     * @param station The station name (ESPRESSO_BAR, PASTRY_STATION, SANDWICH_STATION)
      * @return The corresponding permission string
      * @throws IllegalArgumentException if station is not recognized
      */
     public static String getUpdatePermissionForStation(String station) {
         return switch (station) {
-            case "BAR" -> UPDATE_TASKS_BAR;
-            case "HOT_KITCHEN" -> UPDATE_TASKS_HOT_KITCHEN;
-            case "COLD_KITCHEN" -> UPDATE_TASKS_COLD_KITCHEN;
+            case "ESPRESSO_BAR" -> UPDATE_TASKS_BAR;
+            case "PASTRY_STATION" -> UPDATE_TASKS_PASTRY_STATION;
+            case "SANDWICH_STATION" -> UPDATE_TASKS_SANDWICH_STATION;
             default -> throw new IllegalArgumentException("Unknown station: " + station);
         };
     }

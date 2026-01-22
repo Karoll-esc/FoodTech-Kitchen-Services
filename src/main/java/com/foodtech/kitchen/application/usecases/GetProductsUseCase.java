@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
  * List<Product> availableDrinks = useCase.execute(true, ProductType.DRINK);
  * 
  * // Example 5: Get unavailable hot dishes
- * List<Product> unavailableHotDishes = useCase.execute(false, ProductType.HOT_DISH);
+ * List<Product> unavailableHotDishes = useCase.execute(false, ProductType.PASTRY);
  * }</pre>
  * 
  * <h2>Return Value:</h2>

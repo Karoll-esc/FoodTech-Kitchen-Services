@@ -60,7 +60,7 @@ class ProcessOrderUseCaseTest {
     void shouldProcessMixedOrderAndSaveMultipleTasks() {
         // Given
         Product cocaCola = new Product("Coca Cola", ProductType.DRINK);
-        Product pizza = new Product("Pizza", ProductType.HOT_DISH);
+        Product pizza = new Product("Pizza", ProductType.PASTRY);
         Order order = new Order("B2", List.of(cocaCola, pizza));
         Order savedOrder = Order.reconstruct(2L, "B2", List.of(cocaCola, pizza));
         

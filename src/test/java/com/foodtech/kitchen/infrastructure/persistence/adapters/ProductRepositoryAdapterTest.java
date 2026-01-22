@@ -77,7 +77,7 @@ class ProductRepositoryAdapterTest {
         ProductEntity initialEntity = ProductEntity.builder()
             .name("Pizza Original")
             .description("Pizza clásica")
-            .type(ProductType.HOT_DISH)
+            .type(ProductType.PASTRY)
             .price(new BigDecimal("10.00"))
             .preparationTimeSeconds(600)
             .available(true)
@@ -93,7 +93,7 @@ class ProductRepositoryAdapterTest {
             productId,
             "Pizza Original",
             "Pizza clásica mejorada",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("12.00")),
             700,
             true
@@ -156,8 +156,8 @@ class ProductRepositoryAdapterTest {
     void shouldFindAllProducts() {
         // Given
         createAndPersistProductEntity("Coca Cola", "Bebida", ProductType.DRINK, new BigDecimal("5.00"), 300, true);
-        createAndPersistProductEntity("Pizza", "Pizza clásica", ProductType.HOT_DISH, new BigDecimal("12.00"), 900, true);
-        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.COLD_DISH, new BigDecimal("8.00"), 600, false);
+        createAndPersistProductEntity("Pizza", "Pizza clásica", ProductType.PASTRY, new BigDecimal("12.00"), 900, true);
+        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.SANDWICH, new BigDecimal("8.00"), 600, false);
 
         // When
         List<Product> result = repositoryAdapter.findAll();
@@ -183,8 +183,8 @@ class ProductRepositoryAdapterTest {
     void shouldFindAvailableProducts() {
         // Given
         createAndPersistProductEntity("Coca Cola", "Bebida", ProductType.DRINK, new BigDecimal("5.00"), 300, true);
-        createAndPersistProductEntity("Pizza", "Pizza", ProductType.HOT_DISH, new BigDecimal("12.00"), 900, true);
-        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.COLD_DISH, new BigDecimal("8.00"), 600, false);
+        createAndPersistProductEntity("Pizza", "Pizza", ProductType.PASTRY, new BigDecimal("12.00"), 900, true);
+        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.SANDWICH, new BigDecimal("8.00"), 600, false);
 
         // When
         List<Product> result = repositoryAdapter.findByAvailable(true);
@@ -200,8 +200,8 @@ class ProductRepositoryAdapterTest {
     void shouldFindUnavailableProducts() {
         // Given
         createAndPersistProductEntity("Coca Cola", "Bebida", ProductType.DRINK, new BigDecimal("5.00"), 300, true);
-        createAndPersistProductEntity("Pizza", "Pizza", ProductType.HOT_DISH, new BigDecimal("12.00"), 900, false);
-        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.COLD_DISH, new BigDecimal("8.00"), 600, false);
+        createAndPersistProductEntity("Pizza", "Pizza", ProductType.PASTRY, new BigDecimal("12.00"), 900, false);
+        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.SANDWICH, new BigDecimal("8.00"), 600, false);
 
         // When
         List<Product> result = repositoryAdapter.findByAvailable(false);
@@ -218,7 +218,7 @@ class ProductRepositoryAdapterTest {
         // Given
         createAndPersistProductEntity("Coca Cola", "Bebida", ProductType.DRINK, new BigDecimal("5.00"), 300, true);
         createAndPersistProductEntity("Sprite", "Bebida", ProductType.DRINK, new BigDecimal("4.50"), 300, true);
-        createAndPersistProductEntity("Pizza", "Pizza", ProductType.HOT_DISH, new BigDecimal("12.00"), 900, true);
+        createAndPersistProductEntity("Pizza", "Pizza", ProductType.PASTRY, new BigDecimal("12.00"), 900, true);
 
         // When
         List<Product> result = repositoryAdapter.findByType(ProductType.DRINK);
@@ -230,44 +230,44 @@ class ProductRepositoryAdapterTest {
     }
 
     @Test
-    @DisplayName("Debe encontrar productos por tipo (HOT_DISH)")
+    @DisplayName("Debe encontrar productos por tipo (PASTRY)")
     void shouldFindProductsByTypeHotDish() {
         // Given
-        createAndPersistProductEntity("Pizza", "Pizza", ProductType.HOT_DISH, new BigDecimal("12.00"), 900, true);
-        createAndPersistProductEntity("Pasta", "Pasta", ProductType.HOT_DISH, new BigDecimal("10.00"), 800, true);
-        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.COLD_DISH, new BigDecimal("8.00"), 600, true);
+        createAndPersistProductEntity("Pizza", "Pizza", ProductType.PASTRY, new BigDecimal("12.00"), 900, true);
+        createAndPersistProductEntity("Pasta", "Pasta", ProductType.PASTRY, new BigDecimal("10.00"), 800, true);
+        createAndPersistProductEntity("Ensalada", "Fresca", ProductType.SANDWICH, new BigDecimal("8.00"), 600, true);
 
         // When
-        List<Product> result = repositoryAdapter.findByType(ProductType.HOT_DISH);
+        List<Product> result = repositoryAdapter.findByType(ProductType.PASTRY);
 
         // Then
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(p -> p.getType() == ProductType.HOT_DISH));
+        assertTrue(result.stream().allMatch(p -> p.getType() == ProductType.PASTRY));
     }
 
     @Test
-    @DisplayName("Debe encontrar productos por tipo (COLD_DISH)")
+    @DisplayName("Debe encontrar productos por tipo (SANDWICH)")
     void shouldFindProductsByTypeColdDish() {
         // Given
-        createAndPersistProductEntity("Ensalada César", "Fresca", ProductType.COLD_DISH, new BigDecimal("8.00"), 600, true);
-        createAndPersistProductEntity("Ensalada Griega", "Mediterránea", ProductType.COLD_DISH, new BigDecimal("9.00"), 500, true);
-        createAndPersistProductEntity("Pizza", "Pizza", ProductType.HOT_DISH, new BigDecimal("12.00"), 900, true);
+        createAndPersistProductEntity("Ensalada César", "Fresca", ProductType.SANDWICH, new BigDecimal("8.00"), 600, true);
+        createAndPersistProductEntity("Ensalada Griega", "Mediterránea", ProductType.SANDWICH, new BigDecimal("9.00"), 500, true);
+        createAndPersistProductEntity("Pizza", "Pizza", ProductType.PASTRY, new BigDecimal("12.00"), 900, true);
 
         // When
-        List<Product> result = repositoryAdapter.findByType(ProductType.COLD_DISH);
+        List<Product> result = repositoryAdapter.findByType(ProductType.SANDWICH);
 
         // Then
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertTrue(result.stream().allMatch(p -> p.getType() == ProductType.COLD_DISH));
+        assertTrue(result.stream().allMatch(p -> p.getType() == ProductType.SANDWICH));
     }
 
     @Test
     @DisplayName("Debe retornar lista vacía cuando no hay productos del tipo especificado")
     void shouldReturnEmptyListWhenNoProductsOfType() {
         // Given
-        createAndPersistProductEntity("Pizza", "Pizza", ProductType.HOT_DISH, new BigDecimal("12.00"), 900, true);
+        createAndPersistProductEntity("Pizza", "Pizza", ProductType.PASTRY, new BigDecimal("12.00"), 900, true);
 
         // When
         List<Product> result = repositoryAdapter.findByType(ProductType.DRINK);
@@ -379,7 +379,7 @@ class ProductRepositoryAdapterTest {
         ProductEntity initialEntity = ProductEntity.builder()
             .name("Pizza")
             .description("Pizza clásica")
-            .type(ProductType.HOT_DISH)
+            .type(ProductType.PASTRY)
             .price(new BigDecimal("10.00"))
             .preparationTimeSeconds(600)
             .available(true)
@@ -399,7 +399,7 @@ class ProductRepositoryAdapterTest {
             savedEntity.getId(),
             "Pizza",
             "Pizza mejorada",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("12.00")),
             700,
             true

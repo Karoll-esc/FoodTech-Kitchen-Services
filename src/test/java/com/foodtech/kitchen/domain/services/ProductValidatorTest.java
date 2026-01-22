@@ -161,8 +161,8 @@ class ProductValidatorTest {
     @DisplayName("Debe validar correctamente un tipo válido")
     void shouldValidateValidType() {
         assertDoesNotThrow(() -> validator.validateType(ProductType.DRINK));
-        assertDoesNotThrow(() -> validator.validateType(ProductType.HOT_DISH));
-        assertDoesNotThrow(() -> validator.validateType(ProductType.COLD_DISH));
+        assertDoesNotThrow(() -> validator.validateType(ProductType.PASTRY));
+        assertDoesNotThrow(() -> validator.validateType(ProductType.SANDWICH));
     }
 
     @Test
@@ -277,7 +277,7 @@ class ProductValidatorTest {
         Product product = new Product(
             "A".repeat(100),                        // Maximum name length
             "B".repeat(500),                        // Maximum description length
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("999999.99")),// Large price
             86400                                   // Large preparation time (24h)
         );
@@ -291,7 +291,7 @@ class ProductValidatorTest {
         return new Product(
             "Pizza Margherita",
             "Pizza con tomate, mozzarella y albahaca",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("12.99")),
             900
         );

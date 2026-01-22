@@ -17,7 +17,7 @@ class ProductTest {
     void shouldCreateValidProductWithAllRequiredFields() {
         String name = "Pizza Margherita";
         String description = "Pizza con tomate y mozzarella";
-        ProductType type = ProductType.HOT_DISH;
+        ProductType type = ProductType.PASTRY;
         Price price = new Price(new BigDecimal("12.99"));
         int preparationTime = 900;
 
@@ -85,22 +85,22 @@ class ProductTest {
         );
 
         assertEquals(ProductType.DRINK, product.getType());
-        assertEquals(Station.BAR, product.getType().getStation());
+        assertEquals(Station.ESPRESSO_BAR, product.getType().getStation());
     }
 
     @Test
-    @DisplayName("Debe crear producto de tipo COLD_DISH")
+    @DisplayName("Debe crear producto de tipo SANDWICH")
     void shouldCreateColdDishProduct() {
         Product product = new Product(
             "Ensalada César",
             "Ensalada con pollo",
-            ProductType.COLD_DISH,
+            ProductType.SANDWICH,
             new Price(new BigDecimal("8.99")),
             480
         );
 
-        assertEquals(ProductType.COLD_DISH, product.getType());
-        assertEquals(Station.COLD_KITCHEN, product.getType().getStation());
+        assertEquals(ProductType.SANDWICH, product.getType());
+        assertEquals(Station.SANDWICH_STATION, product.getType().getStation());
     }
 
     // ==================== VALIDATION TESTS - NAME ====================
@@ -295,7 +295,7 @@ class ProductTest {
         Product product = new Product(
             "Slow Roast",
             "Takes a long time",
-            ProductType.HOT_DISH,
+            ProductType.PASTRY,
             new Price(new BigDecimal("25.00")),
             largeTime
         );

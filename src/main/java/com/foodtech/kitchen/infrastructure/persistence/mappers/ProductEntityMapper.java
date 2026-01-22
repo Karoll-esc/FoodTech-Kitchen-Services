@@ -121,7 +121,7 @@ public class ProductEntityMapper {
      *   <li>id - Puede ser null para productos nuevos</li>
      *   <li>name - Obligatorio</li>
      *   <li>description - Obligatorio (puede estar vacío "")</li>
-     *   <li>type - Obligatorio (DRINK, HOT_DISH, COLD_DISH)</li>
+     *   <li>type - Obligatorio (DRINK, PASTRY, SANDWICH)</li>
      *   <li>price - Extraído de Price value object</li>
      *   <li>preparationTimeSeconds - Tiempo en segundos</li>
      *   <li>available - Estado de disponibilidad</li>

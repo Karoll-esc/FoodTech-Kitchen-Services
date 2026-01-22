@@ -11,7 +11,7 @@ import java.math.BigDecimal;
  * @param id product ID
  * @param name product name
  * @param description product description
- * @param type product type (DRINK, HOT_DISH, COLD_DISH)
+ * @param type product type (DRINK, PASTRY, SANDWICH)
  * @param price product price
  * @param preparationTimeSeconds preparation time in seconds
  * @param available availability status

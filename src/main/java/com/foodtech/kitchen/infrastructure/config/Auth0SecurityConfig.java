@@ -43,9 +43,9 @@ import java.util.List;
  * 
  * Roles and Permissions:
  * - admin: Full access (admin:all)
- * - bar-staff: View all tasks, update BAR station tasks
- * - hot-kitchen-staff: View all tasks, update HOT_KITCHEN station tasks  
- * - cold-kitchen-staff: View all tasks, update COLD_KITCHEN station tasks
+ * - bar-staff: View all tasks, update ESPRESSO_BAR station tasks
+ * - pastry-station-staff: View all tasks, update PASTRY_STATION station tasks
+ * - sandwich-station-staff: View all tasks, update SANDWICH_STATION station tasks
  * - waiter: Create orders, view order status
  * 
  * Note: This configuration is disabled when running with 'test' or 'authorization-test' profiles.

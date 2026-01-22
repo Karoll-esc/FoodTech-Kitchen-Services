@@ -8,8 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -34,9 +32,9 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        // Given - Preparar datos: 3 tareas (2 BAR, 1 HOT_KITCHEN)
+        // Given - Preparar datos: 3 tareas (2 ESPRESSO_BAR, 1 PASTRY_STATION)
         
-        // Crear pedido con bebidas para BAR
+        // Crear pedido con bebidas para ESPRESSO_BAR
         Map<String, Object> orderBar1 = Map.of(
             "tableNumber", "A1",
             "products", List.of(
@@ -47,7 +45,7 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(orderBar1)));
 
-        // Crear otro pedido con bebida para BAR
+        // Crear otro pedido con bebida para ESPRESSO_BAR
         Map<String, Object> orderBar2 = Map.of(
             "tableNumber", "A2",
             "products", List.of(
@@ -58,11 +56,11 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(orderBar2)));
 
-        // Crear pedido con plato caliente para HOT_KITCHEN
+        // Crear pedido con plato caliente para PASTRY_STATION
         Map<String, Object> orderHotKitchen = Map.of(
             "tableNumber", "B1",
             "products", List.of(
-                Map.of("name", "Pizza", "type", "HOT_DISH")
+                Map.of("name", "Pizza", "type", "PASTRY")
             )
         );
         mockMvc.perform(post("/api/orders")
@@ -73,13 +71,13 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Scenario 1: Should return only tasks for specified station")
     void shouldReturnOnlyTasksForSpecifiedStation() throws Exception {
-        // When - el encargado de barra consulta sus tareas
-        // Then - el sistema muestra únicamente tareas de barra (verifica filtrado)
-        mockMvc.perform(get("/api/tasks/station/BAR"))
+        // When - el encargado del espresso bar consulta sus tareas
+        // Then - el sistema muestra únicamente tareas de esa estación (verifica filtrado)
+        mockMvc.perform(get("/api/tasks/station/ESPRESSO_BAR"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$[0]").exists())  // Al menos una tarea
-            .andExpect(jsonPath("$[0].station").value("BAR"))
+            .andExpect(jsonPath("$[0].station").value("ESPRESSO_BAR"))
             .andExpect(jsonPath("$[0].tableNumber").exists())
             .andExpect(jsonPath("$[0].products").isArray())
             .andExpect(jsonPath("$[0].createdAt").exists());
@@ -88,10 +86,10 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Scenario 2: Should return empty list when no tasks for station")
     void shouldReturnEmptyListWhenNoTasksForStation() throws Exception {
-        // Given - Todas las tareas son de HOT_KITCHEN, ninguna para COLD_KITCHEN
-        // When - el encargado de cocina fría consulta sus tareas
+        // Given - Todas las tareas son de PASTRY_STATION, ninguna para SANDWICH_STATION
+        // When - el encargado de sándwiches consulta sus tareas
         // Then - el sistema muestra que no hay tareas pendientes
-        mockMvc.perform(get("/api/tasks/station/COLD_KITCHEN"))
+        mockMvc.perform(get("/api/tasks/station/SANDWICH_STATION"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
             .andExpect(jsonPath("$").isEmpty());
@@ -103,10 +101,10 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
         // Given - tareas ya creadas en setUp
         // When - el encargado consulta las tareas
         // Then - el sistema muestra información completa incluyendo createdAt
-        mockMvc.perform(get("/api/tasks/station/BAR"))
+        mockMvc.perform(get("/api/tasks/station/ESPRESSO_BAR"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].tableNumber").exists())
-            .andExpect(jsonPath("$[0].station").value("BAR"))
+            .andExpect(jsonPath("$[0].station").value("ESPRESSO_BAR"))
             .andExpect(jsonPath("$[0].products").isArray())
             .andExpect(jsonPath("$[0].products[0].name").exists())
             .andExpect(jsonPath("$[0].products[0].type").exists())
@@ -116,7 +114,7 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     @DisplayName("Scenario 4: Should return 400 when invalid station")
     void shouldReturn400WhenInvalidStation() throws Exception {
-        // Given - el sistema solo reconoce BAR, HOT_KITCHEN, COLD_KITCHEN
+        // Given - el sistema solo reconoce ESPRESSO_BAR, PASTRY_STATION, SANDWICH_STATION
         // When - se consultan tareas para una estación no reconocida
         // Then - el sistema informa que la estación no existe
         mockMvc.perform(get("/api/tasks/station/INVALID_STATION"))
@@ -146,7 +144,7 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
     @org.springframework.transaction.annotation.Transactional
     void shouldReturnOnlyCompletedTasksForStation() throws Exception {
         // Given - la estación de barra tiene tareas en diferentes estados
-        List<Task> barTasks = taskRepository.findByStation(Station.BAR);
+        List<Task> barTasks = taskRepository.findByStation(Station.ESPRESSO_BAR);
         
         // Start tasks (without completing them through the API)
         Task task1 = barTasks.get(0);
@@ -163,7 +161,7 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
         taskRepository.save(task2);
 
         // When - se consulta el historial de tareas completadas de barra
-        mockMvc.perform(get("/api/tasks/station/BAR?status=COMPLETED"))
+        mockMvc.perform(get("/api/tasks/station/ESPRESSO_BAR?status=COMPLETED"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$", hasSize(2)))
             .andExpect(jsonPath("$[0].status").value("COMPLETED"))
@@ -183,8 +181,8 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
             "products", List.of(
                 Map.of("name", "Coca Cola", "type", "DRINK"),
                 Map.of("name", "Sprite", "type", "DRINK"),  // Same station as Coca Cola
-                Map.of("name", "Pizza", "type", "HOT_DISH"),
-                Map.of("name", "Ensalada", "type", "COLD_DISH")
+                Map.of("name", "Pizza", "type", "PASTRY"),
+                Map.of("name", "Ensalada", "type", "SANDWICH")
             ),
             "tableNumber", "A1"
         ));
@@ -199,7 +197,7 @@ class TaskControllerIntegrationTest extends BaseIntegrationTest {
         Long orderId = allTasks.get(allTasks.size() - 1).getOrderId();
         List<Task> orderTasks = taskRepository.findByOrderId(orderId);
         
-        // Should have created 3 tasks (BAR, HOT_KITCHEN, COLD_KITCHEN)
+        // Should have created 3 tasks (ESPRESSO_BAR, PASTRY_STATION, SANDWICH_STATION)
         assertEquals(3, orderTasks.size());
         
         // Initially all tasks are PENDING

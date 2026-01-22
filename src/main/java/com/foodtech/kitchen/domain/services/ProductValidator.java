@@ -36,7 +36,7 @@ import com.foodtech.kitchen.domain.model.ProductType;
  * Product product = new Product(
  *     "Hamburguesa Clásica",
  *     "Hamburguesa de carne con lechuga y tomate",
- *     ProductType.HOT_DISH,
+ *     ProductType.PASTRY,
  *     new Price(new BigDecimal("15.50")),
  *     300
  * );
@@ -126,7 +126,7 @@ public class ProductValidator {
      * <strong>Business Rules:</strong>
      * <ul>
      *   <li>Type cannot be null</li>
-     *   <li>Type must be a valid ProductType enum value (DRINK, HOT_DISH, COLD_DISH)</li>
+     *   <li>Type must be a valid ProductType enum value (DRINK, PASTRY, SANDWICH)</li>
      * </ul>
      * </p>
      *
