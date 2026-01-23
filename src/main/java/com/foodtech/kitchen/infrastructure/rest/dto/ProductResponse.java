@@ -26,6 +26,7 @@ public record ProductResponse(
     BigDecimal price,
     Integer preparationTimeSeconds,
     Boolean available,
+    String imageUrl,
     String createdAt,
     String updatedAt
 ) {}

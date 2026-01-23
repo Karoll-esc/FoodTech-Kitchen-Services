@@ -131,6 +131,7 @@ public class ProductRepositoryAdapter implements ProductRepository {
         // Actualizar solo campos mutables
         existingEntity.setName(product.getName());
         existingEntity.setDescription(product.getDescription());
+        existingEntity.setImageUrl(product.getImageUrl());
         existingEntity.setType(product.getType());
         existingEntity.setPrice(product.getPrice().getAmount());
         existingEntity.setPreparationTimeSeconds(product.getPreparationTimeSeconds());

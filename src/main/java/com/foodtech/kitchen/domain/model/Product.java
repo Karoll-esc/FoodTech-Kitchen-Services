@@ -65,6 +65,21 @@ import java.time.LocalDateTime;
  * @see Station
  */
 public class Product {
+    /**
+     * Obtiene la URL de la imagen del producto.
+     * @return la URL de la imagen o null si no tiene
+     */
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    /**
+     * Establece la URL de la imagen del producto.
+     * @param imageUrl la URL de la imagen
+     */
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
 
     private Long id;
     private final String name;
@@ -73,6 +88,7 @@ public class Product {
     private Price price;
     private int preparationTimeSeconds;
     private boolean available;
+    private String imageUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
