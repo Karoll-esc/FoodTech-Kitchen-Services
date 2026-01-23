@@ -19,5 +19,6 @@ public record CreateProductRequest(
     String description,
     String type,
     BigDecimal price,
-    Integer preparationTimeSeconds
+    Integer preparationTimeSeconds,
+    String imageUrl
 ) {}
