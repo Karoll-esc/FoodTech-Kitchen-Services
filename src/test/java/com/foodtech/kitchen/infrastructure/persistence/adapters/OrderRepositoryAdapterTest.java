@@ -3,10 +3,12 @@ package com.foodtech.kitchen.infrastructure.persistence.adapters;
 import com.foodtech.kitchen.domain.model.*;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.OrderJpaRepository;
 import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderEntity;
+import com.foodtech.kitchen.infrastructure.persistence.jpa.entities.OrderItemEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,10 +23,8 @@ class OrderRepositoryAdapterTest {
     @BeforeEach
     void setUp() {
         jpaRepository = mock(OrderJpaRepository.class);
-        com.foodtech.kitchen.infrastructure.persistence.mappers.ProductEntityMapper productMapper =
-            new com.foodtech.kitchen.infrastructure.persistence.mappers.ProductEntityMapper();
-        com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper mapper = 
-            new com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper(productMapper);
+        com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper mapper =
+            new com.foodtech.kitchen.infrastructure.persistence.mappers.OrderEntityMapper();
         adapter = new OrderRepositoryAdapter(jpaRepository, mapper);
     }
 
@@ -36,17 +36,15 @@ class OrderRepositoryAdapterTest {
         Product pizza = new Product("Pizza", ProductType.PASTRY);
         Order order = new Order("A1", List.of(cocaCola, pizza));
 
-        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p1 =
-            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                .name("Coca Cola").type(ProductType.DRINK).build();
-        com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity p2 =
-            com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                .name("Pizza").type(ProductType.PASTRY).build();
+        OrderItemEntity item1 = OrderItemEntity.builder()
+            .productName("Coca Cola").productType(ProductType.DRINK).build();
+        OrderItemEntity item2 = OrderItemEntity.builder()
+            .productName("Pizza").productType(ProductType.PASTRY).build();
 
         OrderEntity savedEntity = OrderEntity.builder()
             .id(1L)
             .tableNumber("A1")
-            .products(List.of(p1, p2))
+            .items(List.of(item1, item2))
             .build();
 
         when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);
@@ -64,14 +62,16 @@ class OrderRepositoryAdapterTest {
         // Given
         Product product = new Product("Coca Cola", ProductType.DRINK);
         Order order = new Order("B2", List.of(product));
-        
+
+        OrderItemEntity item = OrderItemEntity.builder()
+            .productName("Coca Cola").productType(ProductType.DRINK).build();
+
         OrderEntity savedEntity = OrderEntity.builder()
             .id(2L)
             .tableNumber("B2")
-            .products(List.of(com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                .name("Coca Cola").type(ProductType.DRINK).build()))
+            .items(List.of(item))
             .build();
-        
+
         when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);
 
         // When
@@ -96,15 +96,15 @@ class OrderRepositoryAdapterTest {
         OrderEntity savedEntity = OrderEntity.builder()
             .id(3L)
             .tableNumber("C3")
-            .products(List.of(
-                com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                    .name("Coca Cola").type(ProductType.DRINK).build(),
-                com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                    .name("Sprite").type(ProductType.DRINK).build(),
-                com.foodtech.kitchen.infrastructure.persistence.jpa.entities.ProductEntity.builder()
-                    .name("Pizza").type(ProductType.PASTRY).build()))
+            .items(List.of(
+                OrderItemEntity.builder()
+                    .productName("Coca Cola").productType(ProductType.DRINK).build(),
+                OrderItemEntity.builder()
+                    .productName("Sprite").productType(ProductType.DRINK).build(),
+                OrderItemEntity.builder()
+                    .productName("Pizza").productType(ProductType.PASTRY).build()))
             .build();
-        
+
         when(jpaRepository.save(any(OrderEntity.class))).thenReturn(savedEntity);
 
         // When

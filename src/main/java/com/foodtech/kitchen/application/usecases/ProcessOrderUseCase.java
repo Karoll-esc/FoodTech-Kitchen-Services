@@ -2,9 +2,11 @@ package com.foodtech.kitchen.application.usecases;
 
 import com.foodtech.kitchen.application.ports.in.ProcessOrderPort;
 import com.foodtech.kitchen.application.ports.out.OrderRepository;
+import com.foodtech.kitchen.application.ports.out.ProductRepository;
 import com.foodtech.kitchen.application.ports.out.TableRepository;
 import com.foodtech.kitchen.application.ports.out.TaskRepository;
 import com.foodtech.kitchen.domain.model.Order;
+import com.foodtech.kitchen.domain.model.Product;
 import com.foodtech.kitchen.domain.model.Table;
 import com.foodtech.kitchen.domain.model.Task;
 import com.foodtech.kitchen.domain.services.TaskDecomposer;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Use case for processing customer orders and managing table occupancy.
@@ -60,25 +63,29 @@ import java.util.Optional;
 public class ProcessOrderUseCase implements ProcessOrderPort {
 
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
     private final TaskDecomposer taskDecomposer;
     private final TaskRepository taskRepository;
     private final TableRepository tableRepository;
 
     /**
      * Constructs the use case with required dependencies.
-     * 
+     *
      * @param orderRepository repository for order persistence
+     * @param productRepository repository for product catalog lookup
      * @param taskDecomposer domain service to decompose orders into tasks
      * @param taskRepository repository for task persistence
      * @param tableRepository repository for table management (HU-007)
      */
     public ProcessOrderUseCase(
             OrderRepository orderRepository,
+            ProductRepository productRepository,
             TaskDecomposer taskDecomposer,
             TaskRepository taskRepository,
             TableRepository tableRepository
     ) {
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
         this.taskDecomposer = taskDecomposer;
         this.taskRepository = taskRepository;
         this.tableRepository = tableRepository;
@@ -105,19 +112,51 @@ public class ProcessOrderUseCase implements ProcessOrderPort {
      */
     @Override
     public List<Task> execute(Order order) {
-        // Step 1: Save order to get database-generated ID
-        Order savedOrder = orderRepository.save(order);
-        
-        // Step 2: Decompose order into kitchen tasks by station
+        // Step 1: Enrich order products with catalog data (preparation time, price, etc.)
+        Order enrichedOrder = enrichOrderWithCatalogData(order);
+
+        // Step 2: Save order to get database-generated ID
+        Order savedOrder = orderRepository.save(enrichedOrder);
+
+        // Step 3: Decompose order into kitchen tasks by station
         List<Task> tasks = taskDecomposer.decompose(savedOrder);
-        
-        // Step 3: Persist all tasks to database
+
+        // Step 4: Persist all tasks to database
         taskRepository.saveAll(tasks);
-        
-        // Step 4: Update table status to OCCUPIED (HU-007)
+
+        // Step 5: Update table status to OCCUPIED (HU-007)
         updateTableStatusToOccupied(savedOrder);
 
         return tasks;
+    }
+
+    /**
+     * Enriches order products with data from the product catalog.
+     *
+     * <p>For each product in the order, looks up the catalog version by name.
+     * If found, uses the catalog product with full details (preparation time, price, etc.).
+     * If not found, keeps the original product (backward compatibility).</p>
+     *
+     * @param order the order with basic product info
+     * @return new Order with enriched products from catalog
+     */
+    private Order enrichOrderWithCatalogData(Order order) {
+        List<Product> enrichedProducts = order.getProducts().stream()
+                .map(this::findCatalogProductOrKeepOriginal)
+                .collect(Collectors.toList());
+
+        return new Order(order.getTableNumber(), enrichedProducts);
+    }
+
+    /**
+     * Finds a product in the catalog by name, or returns the original if not found.
+     *
+     * @param product the product to look up
+     * @return catalog product if found, original product otherwise
+     */
+    private Product findCatalogProductOrKeepOriginal(Product product) {
+        return productRepository.findByName(product.getName())
+                .orElse(product);
     }
 
     /**
