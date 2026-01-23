@@ -7,7 +7,7 @@ import java.util.List;
 
 public class PreparePastryCommand implements Command {
 
-    private static final int MIN_PREPARATION_SECONDS = 1;
+    private static final int MIN_PREPARATION_SECONDS = 30;
 
     private final List<Product> products;
 

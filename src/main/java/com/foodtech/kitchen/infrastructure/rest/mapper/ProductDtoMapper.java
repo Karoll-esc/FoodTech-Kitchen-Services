@@ -41,14 +41,15 @@ public class ProductDtoMapper {
     public static Product toDomain(CreateProductRequest request) {
         ProductType type = ProductType.valueOf(request.type());
         Price price = new Price(request.price());
-        
-        return new Product(
+        Product product = new Product(
             request.name(),
             request.description(),
             type,
             price,
             request.preparationTimeSeconds()
         );
+        product.setImageUrl(request.imageUrl());
+        return product;
     }
 
     /**
@@ -69,6 +70,7 @@ public class ProductDtoMapper {
             product.getPrice().getAmount(),
             product.getPreparationTimeSeconds(),
             product.isAvailable(),
+            product.getImageUrl(),
             product.getCreatedAt().toString(),
             product.getUpdatedAt().toString()
         );

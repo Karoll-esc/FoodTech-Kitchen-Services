@@ -23,11 +23,10 @@ public class OrderEntity {
     @Column(name = "table_number", nullable = false)
     private String tableNumber;
 
-    // ✅ Relación OneToMany - JPA maneja esto nativamente
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "order_id", nullable = false)
     @Builder.Default
-    private List<ProductEntity> products = new ArrayList<>();
+    private List<OrderItemEntity> items = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;

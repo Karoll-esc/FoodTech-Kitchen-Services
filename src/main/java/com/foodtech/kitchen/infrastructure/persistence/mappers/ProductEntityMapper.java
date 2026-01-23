@@ -103,6 +103,7 @@ public class ProductEntityMapper {
             entity.getPreparationTimeSeconds(),
             entity.getAvailable() != null ? entity.getAvailable() : true
         );
+        product.setImageUrl(entity.getImageUrl());
 
         return product;
     }
@@ -140,6 +141,7 @@ public class ProductEntityMapper {
             .id(product.getId())
             .name(product.getName())
             .description(product.getDescription())
+            .imageUrl(product.getImageUrl())
             .type(product.getType())
             .price(product.getPrice().getAmount())
             .preparationTimeSeconds(product.getPreparationTimeSeconds())
@@ -182,19 +184,20 @@ public class ProductEntityMapper {
 
     /**
      * Convierte Product (dominio) a TaskProductEntity (JPA).
-     * 
-     * <p>TaskProductEntity es una entidad embebida en Task que solo contiene
-     * name y type. Se usa para almacenar productos dentro de tareas sin
-     * duplicar toda la información del catálogo.</p>
-     * 
+     *
+     * <p>TaskProductEntity es una entidad embebida en Task que contiene
+     * name, type, y preparationTimeSeconds. Se usa para almacenar productos
+     * dentro de tareas con su tiempo de preparación para simular la cocina.</p>
+     *
      * <p><strong>Uso:</strong> Sistema de tareas (HU-002, HU-003)</p>
-     * 
+     *
      * <p><strong>Campos Mapeados:</strong></p>
      * <ul>
      *   <li>name - Nombre del producto</li>
      *   <li>type - Tipo de producto</li>
+     *   <li>preparationTimeSeconds - Tiempo de preparación en segundos</li>
      * </ul>
-     * 
+     *
      * @param product el producto de dominio a convertir (puede ser null)
      * @return la entidad de tarea JPA, o null si product es null
      */
@@ -206,23 +209,24 @@ public class ProductEntityMapper {
         return TaskProductEntity.builder()
             .name(product.getName())
             .type(product.getType())
+            .preparationTimeSeconds(product.getPreparationTimeSeconds())
             .build();
     }
 
     /**
      * Convierte TaskProductEntity (JPA) a Product (dominio).
-     * 
-     * <p>Crea un producto de dominio usando el constructor legacy Product(name, type)
-     * que establece valores por defecto para campos del catálogo.</p>
-     * 
+     *
+     * <p>Crea un producto de dominio con el tiempo de preparación almacenado
+     * en la tarea. Si no hay tiempo de preparación, usa 1 segundo como fallback.</p>
+     *
      * <p><strong>Valores por Defecto:</strong></p>
      * <ul>
      *   <li>description = ""</li>
      *   <li>price = 0.00</li>
-     *   <li>preparationTimeSeconds = 1</li>
+     *   <li>preparationTimeSeconds = de la entidad o 1 si es null</li>
      *   <li>available = true</li>
      * </ul>
-     * 
+     *
      * @param entity la entidad de tarea JPA a convertir (puede ser null)
      * @return el producto de dominio, o null si entity es null
      */
@@ -231,6 +235,16 @@ public class ProductEntityMapper {
             return null;
         }
 
-        return new Product(entity.getName(), entity.getType());
+        int prepTime = (entity.getPreparationTimeSeconds() != null && entity.getPreparationTimeSeconds() > 0)
+            ? entity.getPreparationTimeSeconds()
+            : 1;
+
+        return new Product(
+            entity.getName(),
+            "",
+            entity.getType(),
+            new Price(BigDecimal.ZERO),
+            prepTime
+        );
     }
 }

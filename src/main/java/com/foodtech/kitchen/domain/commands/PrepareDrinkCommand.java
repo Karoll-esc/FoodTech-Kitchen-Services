@@ -7,7 +7,7 @@ import java.util.List;
 
 public class PrepareDrinkCommand implements Command {
 
-    private static final int MIN_PREPARATION_SECONDS = 1;
+    private static final int MIN_PREPARATION_SECONDS = 45;
 
     private final List<Product> products;
 
