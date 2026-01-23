@@ -17,3 +17,12 @@ spring:
 auth0:
   domain: test.auth0.com
   audience: test-audience
+
+# AWS Test Configuration
+# Mock values for testing - S3 operations should be mocked in tests
+aws:
+  accessKeyId: test-access-key
+  secretAccessKey: test-secret-key
+  region: us-east-1
+  s3:
+    bucket: test-bucket
